@@ -99,12 +99,12 @@ exports.createUser = async (req, res, next) => {
         `, 
       };
   
-      // transporter.sendMail(mailOptions, (error, info) => {
-      //   if (error) {
-      //     return console.error('Email could not be sent:', error);
-      //   }
-      //   console.log('Email sent:', info.response);
-      // });
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          return console.error('Email could not be sent:', error);
+        }
+        console.log('Email sent:', info.response);
+      });
   
       res.status(201).json({ message: 'User created successfully' });
     } catch (error) {
