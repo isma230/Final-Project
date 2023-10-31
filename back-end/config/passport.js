@@ -1,12 +1,65 @@
-
 const bcrypt = require('bcrypt');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
+const User = require('../models/UserModel');
 const Customer = require('../models/CustomerModel');
 const ExtractJwt = require('passport-jwt').ExtractJwt;
 const JwtStrategy = require('passport-jwt').Strategy;
 
-passport.use('customer-local', new LocalStrategy(
+
+passport.use(
+    'local-login',
+    new LocalStrategy(
+      {
+        usernameField: 'email', // Assuming email is the field to identify the user
+        passwordField: 'password',
+      },
+      async (email, password, done) => {
+        try {
+          const user = await User.findOne({ email });
+  
+          if (!user) {
+            return done(null, false, { message: 'Invalid email or password' });
+          }
+  
+          const isValidPassword = await bcrypt.compare(password, user.password);
+  
+          if (!isValidPassword) {
+            return done(null, false, { message: 'Invalid email or password' });
+          }
+  
+          if (!user.active) {
+            return done(null, false, { message: 'User is not active' });
+          }
+  
+          return done(null, user);
+        } catch (error) {
+          return done(error);
+        }
+      }
+    )
+  );
+  
+  
+  
+  
+  // Serialization
+  passport.serializeUser((user, done) => {
+    done(null, user.id);
+  });
+  
+  // Deserialization
+  passport.deserializeUser((id, done) => {
+    User.findById(id)
+      .then(user => {
+        done(null, user);
+      })
+      .catch(err => {
+        done(err, null);
+      });
+  });
+
+  passport.use('customer-local', new LocalStrategy(
     {
       usernameField: 'email',
       passwordField: 'password',
@@ -43,7 +96,8 @@ passport.use('customer-local', new LocalStrategy(
         done(err, null);
       });
   });
-  
+ 
+
   
   const jwtOptions = {
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
