@@ -15,7 +15,7 @@
   },
   "scripts": {
     "dev": "nodemon app.js",
-    "start": "node app.js"
+    "start": "nodemon app.js"
   },
   "name": "back-end",
   "version": "1.0.0",
