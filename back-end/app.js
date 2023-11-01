@@ -29,7 +29,7 @@ app.use(express.json());
 
 
 app.use('/v1/users',userRoutes);
-app.use('/v1/customer' ,customerRoutes );
+app.use('/v1/customers' ,customerRoutes );
 
 const port = process.env.PORT;
 app.listen(port, () => {
