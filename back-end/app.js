@@ -4,10 +4,12 @@ const  connectDB  = require('./config/database');
 const express = require('express');
 const app = express();
 const customerRoutes = require('./routes/CustomerRoutes');
+const orderRoutes = require('./routes/OrderRoutes');
 const bodyParser = require('body-parser');
 const passport = require('passport'); // Assurez-vous d'importer Passport.js
 const session = require('express-session');
 const Customer = require('./models/CustomerModel');
+const Order = require('./models/OrderModel');
 const LocalStrategy = require('passport-local').Strategy;
 const bcrypt = require('bcrypt');
 const secretKey = process.env.SECRET_KEY;
@@ -64,6 +66,7 @@ app.use(session({
   
 
 app.use( customerRoutes );
+app.use( orderRoutes );
 // app.use(bodyParser.json());
 // app.use(bodyParser.urlencoded({ extended: true }));
 
