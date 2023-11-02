@@ -3,6 +3,7 @@ const session = require('express-session');
 const passport = require('passport');
 const userRoutes = require('./routes/UserRoutes');
 const customerRoutes = require('./routes/CustomerRoutes');
+const categoryRoutes = require('./routes/CategoryRoutes');
 const cookieParser = require('cookie-parser');
 //call the .env file
 require('dotenv').config();
@@ -30,6 +31,7 @@ app.use(express.json());
 
 app.use('/v1/users',userRoutes);
 app.use('/v1/customers' ,customerRoutes );
+app.use('/v1/categories', categoryRoutes);
 
 const port = process.env.PORT;
 app.listen(port, () => {
