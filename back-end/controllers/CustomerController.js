@@ -1,360 +1,362 @@
-const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
-const Customer = require('../models/CustomerModel');
-const bcrypt = require('bcrypt');
-require('dotenv').config();
-const nodemailer = require('nodemailer');
-const jwt = require('jsonwebtoken');
-const passportJWT = require('passport-jwt');
+const Customer = require("../models/CustomerModel");
+const bcrypt = require("bcrypt");
+const nodemailer = require("nodemailer");
+const jwt = require("jsonwebtoken");
 
-
-
-const secretKey = process.env.SECRET_KEY;
-
- 
-//------
-
-function isAuthorizedUser(req, allowedRoles) {
-  if (!req.user) {
-    return false;
+// Customer Authentication
+exports.login = async (req, res, next, customer, info) => {
+  if (!customer) {
+    return res.status(401).json({ message: "Invalid email or password" });
   }
 
-  return allowedRoles.includes(req.user.role);
-}
-
-
-
-
-function isCustomer(req) {
-  return req.user && req.user.role === 'customer'; // Ajustez cette condition selon votre modèle de données.
-}
-
-const registerCustomer = async (req, res) => {
-  try {
-    const { first_name, last_name, email, password } = req.body;
-
-    // Vérifie si l'utilisateur a le rôle "customer"
-    if (!isCustomer(req)) {
-      return res.status(403).json({ message: 'Seuls les clients peuvent créer un compte.' });
-    }
-
-    // Vérifie si l'adresse e-mail est unique
-    const existingCustomer = await Customer.findOne({ email });
-    if (existingCustomer) {
-      return res.status(400).json({ message: 'Cet email est déjà enregistré.' });
-    }
-
-    // Envoi de l'email de validation
-    await sendValidationEmail(email, res); // Ajout de 'res' ici
-
-    // Hachage du mot de passe
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    // Créer un nouveau client
-    const newCustomer = new Customer({
-      first_name,
-      last_name,
-      email,
-      password: hashedPassword,
-      valid_account: false, // Le compte n'est pas encore validé
-    });
-
-    await newCustomer.save();
-
-    res.status(201).json({ message: 'Compte client créé avec succès. Vérifiez votre e-mail pour la validation.' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Une erreur s\'est produite lors de la création du compte client.' });
+  if (!customer.active) {
+    return res.status(401).json({ message: "Customer is not active" });
   }
-};
 
+  customer.last_login = new Date();
 
-const sendValidationEmail = async (email, res) => {
   try {
-    const token = jwt.sign({ email }, secretKey, {
-      expiresIn: '1d', // Durée de validité du token (1 jour)
-    });
+    await customer.save();
 
-    const transporter = nodemailer.createTransport({
-      service: 'votre_service_email',
-      auth: {
-        user: 'votre_email',
-        pass: 'votre_mot_de_passe',
+    const token = jwt.sign(
+      {
+        sub: customer._id,
+        role: "Customer",
+        first_name: customer.first_name,
+        last_name: customer.last_name,
+        email: customer.email,
+        creation_date: customer.creation_date,
+        last_login: customer.last_login,
+        valid_account: customer.valid_account,
+        active: customer.active,
       },
-    });
-
-    const activationLink = `https://votre-site.com/activation?token=${token}`;
-
-    await transporter.sendMail({
-      from: 'votre_email',
-      to: email,
-      subject: 'Confirmation de compte',
-      html: `Cliquez sur le lien suivant pour valider votre compte : <a href="${activationLink}">${activationLink}</a>`,
-    });
-
-    res.status(200).json({ message: 'Email de validation envoyé avec succès.' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Erreur lors de l'envoi de l'email de validation." });
-  }
-};
-const validateEmail = async (req, res) => {
-  try {
-    const { token } = req.query;
-
-    if (!token) {
-      return res.status(400).json({ message: 'Token de validation manquant.' });
-    }
-
-    // Vérifiez le token
-    jwt.verify(token, 'votre_clé_secrète', async (err, decoded) => {
-      if (err) {
-        return res.status(401).json({ message: 'Token de validation invalide.' });
-      }
-
-      const customerId = decoded.customerId;
-
-      // Recherchez le client par son ID
-      const customer = await Customer.findById(customerId);
-
-      if (!customer) {
-        return res.status(404).json({ message: 'Client non trouvé.' });
-      }
-
-      // Vérifiez si le compte du client est déjà validé
-      if (customer.valid_account) {
-        return res.status(400).json({ message: 'Le compte est déjà validé.' });
-      }
-
-      // Activer le compte du client
-      customer.valid_account = true;
-
-      // Sauvegarder les modifications dans la base de données
-      await customer.save();
-
-      res.status(200).json({ message: 'Compte activé avec succès.' });
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Une erreur sest produite lors de l'activation du compte." });
-  }
-};
-//----------------------------------------------------
-
-const getCustomerProfile = (req, res) => {
-  if (!req.isAuthenticated()) {
-    return res.status(401).json({ message: 'Accès non autorisé. Authentification requise.' });
-  }
-
-  res.status(200).json(req.user);
-};
-
-const updateCustomerProfile = async (req, res) => {
-  if (!req.isAuthenticated()) {
-    return res.status(401).json({ message: 'Accès non autorisé. Authentification requise.' });
-  }
-
-  const updatedData = req.body;
-
-  try {
-    const updatedCustomer = await Customer.findByIdAndUpdate(req.user._id, updatedData, { new: true });
-    res.status(200).json(updatedCustomer);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Une erreur s\'est produite lors de la mise à jour du profil du client.' });
-  }
-};
-
-const deleteCustomerAccount = async (req, res) => {
-  if (!req.isAuthenticated()) {
-    return res.status(401).json({ message: 'Accès non autorisé. Authentification requise.' });
-  }
-
-  try {
-     await Customer.findByIdAndRemove(req.user._id);
-    res.status(200).json({ message: 'Compte client supprimé avec succès.' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Une erreur s\'est produite lors de la suppression du compte client.' });
-  }
-};
-
-const loginCustomer = (req, res, next) => {
-  passport.authenticate('customer-local', async (err, customer, info) => {
-    if (err) {
-      return next(err);
-    }
-
-    if (!customer) {
-      return res.status(401).json(info);
-    }
-
-    // Vérifier si le compte du client est actif
-    if (!customer.active) {
-      return res.status(401).json({ message: 'Votre compte n\'est pas actif.' });
-    }
-
-    // Vérifier si le compte du client est valide (si nécessaire)
-    if (!customer.valid_account) {
-      return res.status(401).json({ message: 'Votre compte n\'est pas valide.' });
-    }
+      process.env.JWT_SECRET_KEY
+    );
+    res.cookie("jwt", token, { httpOnly: true });
 
     req.logIn(customer, (err) => {
       if (err) {
         return next(err);
       }
-
-      return res.status(200).json({ message: 'Authentification réussie.' });
+      return res.json({ message: "Login successful", token });
     });
-  })(req, res, next);
-};
-
-
-
-// Récupérer la liste de tous les clients
-const getAllCustomers = async (req, res) => {
-  try {
-    // Vérifier si l'utilisateur a les rôles d'administrateur ou de gestionnaire
-    if (!req.user || (!req.user.isAdmin && !req.user.isManager)) {
-      return res.status(403).json({ message: 'Accès non autorisé.' });
-    }
-
-    // Définir la limite par page (dans cet exemple, 10 clients par page)
-    const limit = 10;
-
-    // Récupérer la page demandée depuis les paramètres de requête (par exemple, ?page=1)
-    const page = parseInt(req.query.page) || 1;
-
-    // Récupérer la liste de clients en fonction de la limite et de la page
-    const customers = await Customer.find()
-      .limit(limit)
-      .skip((page - 1) * limit)
-      .exec();
-
-    // Si aucun client n'existe, renvoyer un tableau vide
-    if (customers.length === 0) {
-      return res.status(200).json([]);
-    }
-
-    res.status(200).json(customers);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Une erreur s\'est produite lors de la récupération de la liste des clients.' });
+  } catch (err) {
+    return next(err);
   }
 };
 
-const searchForCustomer = async (req, res) => {
+// Create Customer Account
+exports.createCustomerAccount = async (req, res, next) => {
   try {
-    if (req.user.role !== 'admin' && req.user.role !== 'manager') {
-      return res.status(403).json({ message: 'Access denied. Only admin and manager can access this feature.' });
+    const { first_name, last_name, email, password } = req.body;
+
+    const existingCustomer = await Customer.findOne({ email });
+
+    if (existingCustomer) {
+      return res
+        .status(400)
+        .json({ message: "Customer with the same email already exists" });
     }
 
-    const searchQuery = req.query.query || ''; // Paramètre de recherche, par défaut une chaîne vide
-    const page = parseInt(req.query.page) || 1; // Paramètre de page, par défaut 1
-    const maxResults = 10; // Nombre maximum de résultats par page
-    const sort = req.query.sort || ''; // Paramètre de tri, par défaut une chaîne vide
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Logique pour rechercher les clients en fonction de ces paramètres
-    const customers = await Customer.find({
+    const newCustomer = new Customer({
+      first_name,
+      last_name,
+      email,
+      password: hashedPassword,
+      creation_date: new Date(),
+      last_login: null,
+      valid_account: false, // Account starts as not validated
+      active: true,
+    });
+
+    await newCustomer.save();
+
+    // Check if the customer's email has been previously validated
+    if (!newCustomer.valid_account) {
+      // Send a validation email
+      const transporter = nodemailer.createTransport({
+        service: process.env.EMAIL_HOST,
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASSWORD,
+        },
+      });
+
+      const validationLink = `${process.env.APP_URL}/v1/customers/validate/${newCustomer._id}`;
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "Validate Account",
+        html: `<p>Your account has been created. Please click the button below to validate your email:</p>
+        <a href="${validationLink}"><button>Validate Email</button></a>`,
+      };
+
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.error("Email could not be sent:", error);
+        } else {
+          console.log("Email sent:", info.response);
+        }
+      });
+    }
+
+    res.status(201).json({ message: "Customer account created successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// List or Search Customers
+exports.listOrSearchCustomers = async (req, res) => {
+  try {
+    const { query, page, limit = 10, sort } = req.query;
+    const rolesAllowedToAccess = ["Admin", "Manager"];
+
+    // Check if the user's role is allowed to access this functionality
+    if (!rolesAllowedToAccess.includes(req.user.role)) {
+      return res
+        .status(403)
+        .json({ message: "Access denied. You do not have the required role." });
+    }
+
+    const pageNumber = parseInt(page);
+    const limitNumber = parseInt(limit);
+    const skip = (pageNumber - 1) * limitNumber;
+
+    const sortDirection = sort === "DESC" ? -1 : 1;
+    const sortField = "creation_date"; // Sort by 'creation_date' field
+
+    const searchFilter = {
       $or: [
-        { first_name: { $regex: searchQuery, $options: 'i' } },
-        { last_name: { $regex: searchQuery, $options: 'i' } },
-        { email: { $regex: searchQuery, $options: 'i' } },
+        { first_name: { $regex: query, $options: "i" } },
+        { last_name: { $regex: query, $options: "i" } },
+        { email: { $regex: query, $options: "i" } },
       ],
-    })
-      .limit(maxResults)
-      .skip((page - 1) * maxResults) // Pour la pagination
-      .sort(sort); // Tri
+    };
 
-    res.status(200).json({
-      query: searchQuery,
-      page,
-      sort,
-      results: customers, // Les clients trouvés
-      message: 'Requête de recherche de clients réussie',
-    });
+    // Check if a query exists to determine whether to list or search for users
+    const customersQuery = query
+      ? Customer.find(searchFilter)
+      : Customer.find();
+
+    const customers = await customersQuery
+      .skip(skip)
+      .limit(limitNumber)
+      .sort({ [sortField]: sortDirection });
+
+    const totalCustomers = query
+      ? await Customer.countDocuments(searchFilter)
+      : await Customer.countDocuments();
+
+    res.status(200).json({ customers, totalCustomers });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'An error occurred while searching for customers.' });
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
-const getCustomerById = async (req, res) => {
+// Get Customer by ID
+exports.getCustomerById = async (req, res) => {
   try {
-    if (req.user.role !== 'admin' && req.user.role !== 'manager') {
-      return res.status(403).json({ message: 'Access denied. Only admin and manager can access this feature.' });
-    }
-
-    const customerId = req.params.id;
-
-    const customer = await Customer.findById(customerId);
+    const { id } = req.params;
+    const customer = await Customer.findById(id);
 
     if (!customer) {
-      return res.status(404).json({ message: 'Customer not found.' });
+      return res.status(404).json({ message: "Customer not found" });
+    }
+
+    if (!["Admin", "Manager"].includes(req.user.role)) {
+      return res
+        .status(403)
+        .json({ message: "Access denied. You do not have the required role." });
     }
 
     res.status(200).json(customer);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'An error occurred while retrieving the customer.' });
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
-const updateCustomerData = async (req, res) => {
+// Update Customer Data by ID
+exports.updateCustomerById = async (req, res) => {
   try {
-    // Vérifie si l'utilisateur a le rôle "admin" ou "manager"
-    if (!isAuthorizedUser(req, ['admin', 'manager'])) {
-      return res.status(403).json({ message: 'Seuls les administrateurs et les gestionnaires peuvent effectuer cette action.' });
+    const { id } = req.params;
+    const customer = await Customer.findById(id);
+
+    if (!customer) {
+      return res.status(404).json({ message: "Customer not found" });
     }
 
-    // Récupère les données de la requête
-    const { firstName, lastName, email, role, active } = req.body;
-
-    // Vérifie si l'adresse e-mail est unique, sauf si c'est l'adresse e-mail actuelle du client
-    if (email) {
-      const existingCustomer = await Customer.findOne({ email });
-      if (existingCustomer && existingCustomer._id != req.user._id) {
-        return res.status(400).json({ message: 'Cet email est déjà enregistré.' });
-      }
+    if (req.user.role !== "Admin") {
+      return res
+        .status(403)
+        .json({ message: "Access denied. You do not have the required role." });
     }
 
-    // Met à jour les données du client
-    const updatedData = {
-      first_name: firstName,
-      last_name: lastName,
-      email: email,
-      role: role,
-      active: active,
-    };
+    const { email, first_name, last_name, active } = req.body;
 
-    const updatedCustomer = await Customer.findByIdAndUpdate(req.user._id, updatedData, { new: true });
+    const existingCustomerWithEmail = await Customer.findOne({
+      email,
+      _id: { $ne: id },
+    });
 
-    if (!updatedCustomer) {
-      return res.status(404).json({ message: 'Client non trouvé.' });
+    if (existingCustomerWithEmail) {
+      return res
+        .status(400)
+        .json({ message: "Customer with the same email already exists" });
     }
 
-    res.status(200).json(updatedCustomer);
+    customer.email = email;
+    customer.first_name = first_name;
+    customer.last_name = last_name;
+    customer.active = active;
+
+    await customer.save();
+
+    res.status(200).json({ message: "Customer data updated successfully" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Une erreur s\'est produite lors de la mise à jour des données du client.' });
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
+// Delete Customer Account by ID
+exports.deleteCustomerById = async (req, res) => {
+  try {
+    if (req.user.role !== "Customer") {
+      return res
+        .status(403)
+        .json({ message: "Only customers can delete their own accounts" });
+    }
 
+    const customerId = req.params.id;
+    const deletedCustumer = await Customer.findByIdAndRemove(customerId);
 
+    if (!deletedCustumer) {
+      return res.status(404).json({ message: "Customer not found" });
+    }
 
+    res.status(200).json({
+      message: "Customer account deleted successfully",
+      deletedCustumer,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
 
-module.exports = {
-  searchForCustomer,
-  getAllCustomers,
-  loginCustomer,
-  registerCustomer,
-  getCustomerProfile,
-  updateCustomerProfile,
-  deleteCustomerAccount,
-  getCustomerById,
-  sendValidationEmail,
-  validateEmail,
-  updateCustomerData,
+// Get Customer's Profile
+exports.getCustomerProfile = (req, res) => {
+  if (req.user.role !== "Customer") {
+    return res
+      .status(403)
+      .json({ message: "Access denied. You do not have the required role." });
+  }
+
+  const customerProfile = {
+    first_name: req.user.first_name,
+    last_name: req.user.last_name,
+    email: req.user.email,
+    creation_date: req.user.creation_date,
+    last_login: req.user.last_login,
+    valid_account: req.user.valid_account,
+    active: req.user.active,
+  };
+
+  res.status(200).json(customerProfile);
+};
+
+exports.updateCustomerProfile = async (req, res) => {
+  try {
+    const id = req.user.sub; // Get the customer's ID from the authenticated user
+    // Check if the provided data includes fields that should be updated
+    const { email, first_name, last_name } = req.body;
+
+    // Find the customer by their ID
+    const customer = await Customer.findById(id);
+    if (!customer) {
+      return res.status(404).json({ message: "Customer not found" });
+    }
+    // console.log(id,customer._id.toString());
+    // Check if the customer is trying to update their own data
+    if (id !== customer._id.toString()) {
+      return res
+        .status(403)
+        .json({ message: "Access denied. You can only update your own data." });
+    }
+    // Check if the customer is trying to update their email, and if it's unique
+    if (email && email !== customer.email) {
+      const existingCustomerWithEmail = await Customer.findOne({ email });
+
+      if (existingCustomerWithEmail) {
+        return res
+          .status(400)
+          .json({ message: "Customer with the same email already exists" });
+      }
+
+      // Update the email
+      customer.email = email;
+    }
+
+    // Update other fields (first_name, last_name, etc.) if provided
+    if (first_name) {
+      customer.first_name = first_name;
+    }
+
+    if (last_name) {
+      customer.last_name = last_name;
+    }
+
+    // Save the updated customer data
+    await customer.save();
+
+    res.status(200).json({ message: "Customer data updated successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+//validate customer account
+exports.validateCustomerAccount = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Find the customer by their ID
+    const customer = await Customer.findById(id);
+
+    if (!customer) {
+      return res.status(404).json({ message: "Customer not found" });
+    }
+
+    // Check if the customer's email was validated
+    if (!customer.valid_account) {
+      // Set the valid account status to true
+      customer.valid_account = true;
+      // Save the updated customer
+      await customer.save();
+      return res.status(200).json({ message: "Customer account validated successfully" });
+    }
+
+    return res.status(200).json({ message: "Customer account is already validated" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Logout
+exports.logout = (req, res) => {
+  req.logout(function (err) {
+    if (err) {
+      // Handle any potential errors here
+      return res.status(500).json({ message: "Error during logout" });
+    }
+    res.clearCookie("jwt"); // Clear the JWT cookie
+    res.status(200).json({ message: "Logout successful" });
+  });
 };

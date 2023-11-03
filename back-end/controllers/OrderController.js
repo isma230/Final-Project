@@ -1,182 +1,157 @@
 const Order = require('../models/OrderModel');
 const { v4: uuidv4 } = require('uuid');
 const Customer = require('../models/CustomerModel');
-const passport = require('passport');
 
-const createOrder = async (req, res) => {
+exports.createOrder = async (req, res) => {
   try {
-    // 1. Vérifier si l'utilisateur est authentifié
-    if (!req.isAuthenticated()) {
-      return res.status(403).json({ message: "Vous n'êtes pas autorisé à effectuer cette action. Vous devez être authentifié." });
-    }
-
-    // 2. Vérifier si l'utilisateur a validé son e-mail
-    if (!req.user.valid_account) {
-      return res.status(403).json({ message: "Vous devez d'abord valider votre adresse e-mail pour créer une commande." });
-    }
-
-    // 3. Vérifier si l'utilisateur est un client
-    if (req.user.role !== 'customer') {
-      return res.status(403).json({ message: "Seuls les clients peuvent créer une commande." });
-    }
-
+    // Récupérer les informations nécessaires depuis la requête
     const { customerID, orderItems, cartTotalPrice } = req.body;
 
-    // 4. Créer une nouvelle commande avec le statut "Open" par défaut
+    // Créer une nouvelle commande avec le statut "Open" par défaut
+    const orderId = uuidv4(); // Générez un nouvel ID pour la commande
     const newOrder = new Order({
-      id: generateOrderId(),
+      _id: orderId,
       customer_id: customerID,
       order_items: orderItems,
       cart_total_price: cartTotalPrice,
+      status: "Open", // Statut par défaut
+      order_date: new Date(), // Date de la commande
     });
 
-    // 5. Mettre à jour la date de la commande
-    newOrder.order_date = new Date();
-
+    // Enregistrer la nouvelle commande dans la base de données
     await newOrder.save();
 
-    res.status(201).json({ message: "Commande créée avec succès." });
+    res.status(201).json({ message: "Commande créée avec succès" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Une erreur s'est produite lors de la création de la commande." });
+    res.status(500).json({ message: "Une erreur s'est produite lors de la création de la commande" });
   }
-};
-
-
-function isAuthorizedUser(req, allowedRoles) {
-    if (!req.user) {
-      return false;
-    }
-  
-    return allowedRoles.includes(req.user.role);
-  }
-
-// Fonction pour générer un ID de commande unique en utilisant uuid
-function generateOrderId() {
-  return uuidv4();
 }
 
-const listOrders = async (req, res) => {
+exports.listOrders = async (req, res) => {
   try {
-    // 1. Vérifier si l'utilisateur a les rôles d'administrateur ou de gestionnaire
-    if (!isAuthorizedUser(req, ['admin', 'manager'])) {
-      return res.status(403).json({ message: "Vous n'avez pas les privilèges nécessaires pour accéder à cette ressource." });
+    // Vérifier les privilèges de l'utilisateur
+    if (!["Admin", "Manager"].includes(req.user.role)) {
+      return res.status(403).json({ message: "You don't have enough privilege" });
     }
 
-    // 2. Récupérer la page demandée depuis les paramètres de requête (par exemple, ?page=1)
-    const page = parseInt(req.query.page) || 1;
-
-    // 3. Limite par page (dans cet exemple, 10 commandes par page)
+    const page = req.query.page ? parseInt(req.query.page) : 1;
     const limit = 10;
+    const skip = (page - 1) * limit;
 
-    // 4. Récupérer la liste de commandes avec des détails de client
-    const orders = await Order.find()
-      .limit(limit)
-      .skip((page - 1) * limit)
-      .exec();
+    const orders = await Order.aggregate([
+      {
+        $match: {}, // Filtre pour correspondre à toutes les commandes
+      },
+      {
+        $lookup: {
+          from: "customers", // Nom de la collection ou table des clients
+          localField: "customer_id",
+          foreignField: "_id", // Changer "id" en "_id" si c'est l'ID
+          as: "customerInfo",
+        },
+      },
+      {
+        $unwind: "$customerInfo",
+      },
+      {
+        $group: {
+          _id: "$_id",
+          customerID: { $first: "$customer_id" },
+          customerFirstName: { $first: "$customerInfo.first_name" },
+          customerLastName: { $first: "$customerInfo.last_name" },
+          itemsTotal: { $sum: { $size: "$order_items" } },
+          orderDate: { $first: "$order_date" },
+          cartTotalPrice: { $first: "$cart_total_price" },
+          status: { $first: "$status" },
+        },
+      },
+      { $sort: { orderDate: -1 } }, // Triez par date de commande décroissante
+      { $skip: skip },
+      { $limit: limit },
+    ]);
 
-    // 5. Créer un tableau pour stocker les données finales
-    const ordersWithCustomerInfo = [];
-
-    for (const order of orders) {
-      const customer = await Customer.findOne({ _id: order.customer_id });
-
-      if (customer) {
-        // 6. Construire l'objet de commande avec des détails de client
-        const orderData = {
-          _id: order._id,
-          customerID: order.customer_id,
-          customerFirstName: customer.first_name,
-          customerLastName: customer.last_name,
-          itemsTotal: order.order_items.length,
-          orderDate: order.order_date,
-          cartTotalPrice: order.cart_total_price,
-          status: order.status,
-        };
-
-        ordersWithCustomerInfo.push(orderData);
-      }
-    }
-
-    res.status(200).json({ data: ordersWithCustomerInfo });
+    res.status(200).json({ data: orders });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Une erreur s'est produite lors de la récupération de la liste des commandes." });
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
-const getOrderById = async (req, res) => {
+exports.getOrderById = async (req, res) => {
   try {
-    // 1. Vérifier si l'utilisateur a les rôles d'administrateur ou de gestionnaire
-    if (!isAuthorizedUser(req, ['admin', 'manager'])) {
-      return res.status(403).json({ message: "Vous n'avez pas les privilèges nécessaires pour accéder à cette ressource." });
+    // Vérifier les privilèges de l'utilisateur
+    if (!["Admin", "Manager"].includes(req.user.role)) {
+      return res.status(403).json({ message: "You don't have enough privilege" });
     }
 
-    // 2. Récupérer l'ID de commande depuis les paramètres de requête (par exemple, /orders/123)
     const orderId = req.params.id;
 
-    // 3. Rechercher la commande par son ID
-    const order = await Order.findOne({ _id: orderId });
+    const order = await Order.aggregate([
+      {
+        $match: {
+          _id: orderId, // Filtrer par ID de commande
+        },
+      },
+      {
+        $lookup: {
+          from: "customers", // Nom de la collection ou table des clients
+          localField: "customer_id",
+          foreignField: "_id", // Changer "id" en "_id" si c'est l'ID
+          as: "customerInfo",
+        },
+      },
+      {
+        $unwind: "$customerInfo",
+      },
+      {
+        $group: {
+          _id: "$_id",
+          customerID: { $first: "$customer_id" },
+          customerFirstName: { $first: "$customerInfo.first_name" },
+          customerLastName: { $first: "$customerInfo.last_name" },
+          itemsTotal: { $sum: { $size: "$order_items" } },
+          orderDate: { $first: "$order_date" },
+          cartTotalPrice: { $first: "$cart_total_price" },
+          status: { $first: "$status" },
+        },
+      },
+    ]);
 
-    if (!order) {
-      return res.status(404).json({ message: "Commande non trouvée." });
+    if (order.length === 0) {
+      return res.status(404).json({ message: "Order not found" });
     }
 
-    // 4. Récupérer le client associé à la commande
-    const customer = await Customer.findOne({ _id: order.customer_id });
-
-    if (!customer) {
-      return res.status(404).json({ message: "Client non trouvé pour cette commande." });
-    }
-
-    // 5. Construire l'objet de commande avec les détails du client
-    const orderData = {
-      _id: order._id,
-      customerID: order.customer_id,
-      customerFirstName: customer.first_name,
-      customerLastName: customer.last_name,
-      orderItems: order.order_items,
-      orderDate: order.order_date,
-      cartTotalPrice: order.cart_total_price,
-      status: order.status,
-    };
-
-    res.status(200).json({ data: [orderData] });
+    res.status(200).json({ data: order[0] });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Une erreur s'est produite lors de la récupération des détails de la commande." });
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
-const updateOrderStatus = async (req, res) => {
+
+exports.updateOrderStatus = async (req, res) => {
   try {
-    // 1. Vérifier si l'utilisateur a les rôles d'administrateur ou de gestionnaire
-    if (!isAuthorizedUser(req, ['admin', 'manager'])) {
-      return res.status(403).json({ message: "Vous n'avez pas les privilèges nécessaires pour effectuer cette action." });
+    // Vérifier les privilèges de l'utilisateur
+    if (!["Admin", "Manager"].includes(req.user.role)) {
+      return res.status(403).json({ message: "You don't have enough privilege" });
     }
 
-    // 2. Récupérer l'ID de commande depuis les paramètres de requête (par exemple, /orders/123)
     const orderId = req.params.id;
+    const newStatus = req.body.status;
 
-    // 3. Récupérer le nouveau statut de commande depuis le corps de la requête
-    const { status } = req.body;
-
-    // 4. Rechercher la commande par son ID
-    const order = await Order.findOne({ _id: orderId });
+    const order = await Order.findById(orderId);
 
     if (!order) {
-      return res.status(404).json({ message: "ID de commande invalide." });
+      return res.status(404).json({ message: "Order not found" });
     }
 
-    // 5. Mettre à jour le statut de la commande
-    order.status = status;
+    order.status = newStatus;
     await order.save();
 
-    res.status(200).json({ message: "Statut de commande mis à jour avec succès." });
+    res.status(200).json({ message: "Order status updated successfully" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Une erreur s'est produite lors de la mise à jour du statut de commande." });
+    res.status(500).json({ message: "Internal server error" });
   }
 };
-
-module.exports = { createOrder, listOrders, getOrderById, updateOrderStatus };
