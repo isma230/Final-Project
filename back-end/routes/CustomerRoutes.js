@@ -25,7 +25,7 @@ router.get('/:id', isAuthenticated , CustomerController.getCustomerById);
 router.put('/:id', isAuthenticated , CustomerController.updateCustomerById);
 
 // DELETE route to delete a user by ID
-router.delete('/:id', isAuthenticated, CustomerController.deleteCustomerById);
+router.delete('/delete', isAuthenticated, CustomerController.deleteCustomer);
 
 // GET route to get the profile of the currently authenticated user
 router.get('/details/profile', isAuthenticated , CustomerController.getCustomerProfile);

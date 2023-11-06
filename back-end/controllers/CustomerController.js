@@ -224,7 +224,7 @@ exports.updateCustomerById = async (req, res) => {
 };
 
 // Delete Customer Account by ID
-exports.deleteCustomerById = async (req, res) => {
+exports.deleteCustomer = async (req, res) => {
   try {
     if (req.user.role !== "Customer") {
       return res
@@ -232,7 +232,7 @@ exports.deleteCustomerById = async (req, res) => {
         .json({ message: "Only customers can delete their own accounts" });
     }
 
-    const customerId = req.params.id;
+    const customerId = req.user.sub;
     const deletedCustumer = await Customer.findByIdAndRemove(customerId);
 
     if (!deletedCustumer) {

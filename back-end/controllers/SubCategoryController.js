@@ -1,5 +1,5 @@
 const Subcategory = require('../models/SubCategoryModel'); // Import your Subcategory model
-
+const Product = require('../models/ProductModel'); // Import your Product model
 // Function to create a new subcategory
 exports.createSubcategory = async (req, res) => {
   try {
@@ -137,26 +137,25 @@ exports.updateSubcategoryById = async (req, res) => {
 };
 
 // Delete Subcategory by ID
-// Delete Subcategory by ID
 exports.deleteSubcategoryById = async (req, res) => {
   try {
     const { id } = req.params;
     const subcategory = await Subcategory.findById(id);
 
-    if (!subcategory) {
-      return res.status(404).json({ message: "Subcategory not found" });
-    }
-
     if (req.user.role !== "Admin" && req.user.role !== "Manager") {
       return res.status(403).json({ message: "Access denied. You do not have the required role." });
     }
 
-    // Check if subcategory has attached products
-    // const productsWithSubcategoryId = await Product.find({ subcategory_id: id });
+    if (!subcategory) {
+      return res.status(404).json({ message: "Subcategory not found" });
+    }
 
-    // if (productsWithSubcategoryId.length > 0) {
-    //   return res.status(400).json({ message: "Cannot delete subcategory with attached products" });
-    // }
+    // Check if subcategory has attached products
+    const productsWithSubcategoryId = await Product.find({ subcategory_id: id });
+
+    if (productsWithSubcategoryId.length > 0) {
+      return res.status(400).json({ message: "Cannot delete subcategory with attached products" });
+    }
 
     await Subcategory.findByIdAndRemove(id);
 
