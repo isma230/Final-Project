@@ -31,10 +31,9 @@ app.use(express.json());
 
 app.use('/v1/users',userRoutes);
 app.use('/v1/customers' ,customerRoutes );
-
 app.use( '/v1/orders',orderRoutes );
   
-const port = process.env.PORT || 3500;
+const port = process.env.PORT ;
 app.listen(port, () => {
     console.log(`Listening on port ${port}...`);
     }); 
