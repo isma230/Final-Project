@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/UserController');
 const passport = require('passport');
-const isAuthenticated = require('../middleware/isAuthenticated');
+ const isAuthenticated = require('../middleware/isAuthenticated');
 
 // Login route
 router.post("/login", (req, res, next) => {
@@ -12,7 +12,7 @@ router.post("/login", (req, res, next) => {
 });
 
 // Create User (accessible only to Admin users)
-router.post('/create-user', isAuthenticated, userController.createUser);
+router.post('/create-user', isAuthenticated , userController.createUser);
 
 // GET route to list or search all users (with pagination)
 router.get('/', isAuthenticated, userController.listOrSearchUsers);
