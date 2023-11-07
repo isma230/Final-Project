@@ -13,6 +13,6 @@ router.get('/list', isAuthenticated, OrderController.listOrders);
 router.get('/:id', isAuthenticated, OrderController.getOrderById);
 
 // Route pour mettre à jour le statut d'une commande
-router.put('/:id/status', isAuthenticated, OrderController.updateOrderStatus);
+router.put('/:id', isAuthenticated, OrderController.updateOrderStatus);
 
 module.exports = router;
