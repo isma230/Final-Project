@@ -41,7 +41,7 @@ exports.login = async (req, res, next, customer, info) => {
       return res.json({ message: "Login successful", token });
     });
   } catch (err) {
-    return next(err);
+    return next(err);  
   }
 };
 
@@ -49,13 +49,17 @@ exports.login = async (req, res, next, customer, info) => {
 exports.createCustomerAccount = async (req, res, next) => {
   try {
     const { first_name, last_name, email, password } = req.body;
-
+   console.log(req.body);
     const existingCustomer = await Customer.findOne({ email });
 
     if (existingCustomer) {
       return res
         .status(400)
         .json({ message: "Customer with the same email already exists" });
+    }
+
+    if (!password) {
+      return res.status(400).json({ message: "Password is required" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -104,6 +108,7 @@ exports.createCustomerAccount = async (req, res, next) => {
 
     res.status(201).json({ message: "Customer account created successfully" });
   } catch (error) {
+    res.status(500).json({ message: "Internal Server Error", error: error.message });
     next(error);
   }
 };
@@ -224,7 +229,7 @@ exports.updateCustomerById = async (req, res) => {
 };
 
 // Delete Customer Account by ID
-exports.deleteCustomerById = async (req, res) => {
+exports.deleteCustomer = async (req, res) => {
   try {
     if (req.user.role !== "Customer") {
       return res
@@ -232,7 +237,7 @@ exports.deleteCustomerById = async (req, res) => {
         .json({ message: "Only customers can delete their own accounts" });
     }
 
-    const customerId = req.params.id;
+    const customerId = req.user.sub;
     const deletedCustumer = await Customer.findByIdAndRemove(customerId);
 
     if (!deletedCustumer) {

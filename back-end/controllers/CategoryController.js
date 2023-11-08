@@ -1,5 +1,5 @@
 const Category = require('../models/CategoryModel'); // Import the Category model
-
+const Subcategory = require('../models/SubCategoryModel'); // Import the Subcategory model
 // Function to create a new category
 exports.createCategory = async (req, res) => {
   try {
@@ -158,6 +158,12 @@ exports.deleteCategoryById = async (req, res) => {
         return res
           .status(403)
           .json({ message: "Access denied. You do not have the required role." });
+      }
+      
+      //check if there are subcategories with this category_id
+      const subcategories = await Subcategory.find({category_id: id});
+      if (subcategories.length > 0) {
+        return res.status(400).json({ message: "Cannot delete category with attached subcategory" });
       }
   
       await Category.findByIdAndRemove(id);
