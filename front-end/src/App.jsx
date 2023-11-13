@@ -1,13 +1,19 @@
-import { useState } from 'react'
-import './App.css'
-import Dashboard from './back-office/dashboardPage';
-function App() {
+/* eslint-disable perfectionist/sort-imports */
+import './back-office/global.css';
+
+import { useScrollToTop } from './back-office/hooks/use-scroll-to-top';
+
+import Router from './back-office/routes/sections';
+import ThemeProvider from './back-office/theme';
+
+// ----------------------------------------------------------------------
+
+export default function App() {
+  useScrollToTop();
 
   return (
-    <div>
-      <Dashboard />
-    </div>
-  )
+    <ThemeProvider>
+      <Router />
+    </ThemeProvider>
+  );
 }
-
-export default App;
