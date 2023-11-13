@@ -1,11 +1,10 @@
 import { useState } from 'react'
-import './App.css'
-
+import LoginPage from './back-office/loginPage'
 function App() {
 
   return (
     <>
- 
+    <LoginPage />
     </>
   )
 }

@@ -30,7 +30,7 @@ exports.login = async (req, res, next, user, info) => {
       if (err) {
         return next(err);
       }
-      return res.json({ message: 'Login successful', token });
+      return res.json({ message: 'Login successful', token , user});
     });
   } catch (err) {
     return next(err);
