@@ -8,10 +8,9 @@ const categoryRoutes = require('./routes/CategoryRoutes');
 const subcategoryRoutes = require('./routes/SubCategoryRoutes');
 const productRoutes = require('./routes/ProductRoutes');
 const cookieParser = require('cookie-parser');
-const cors = require('cors');
-
 //call the .env file
 require('dotenv').config();
+
 
 // Initialize Express 
 const app = express(); // Déplacez cette ligne ici
@@ -29,6 +28,11 @@ app.use(cors({
 
 const db = require('./config/database');
 const passportSetup = require('./config/passport');
+app.use(cors({
+  origin: 'http://localhost:5173', // your frontend's address
+  // methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+}));
 
 app.use(cookieParser());
 
@@ -37,7 +41,7 @@ app.use(session({
   secret: process.env.SESSION_SECRET_KEY, // Change this to a strong, random secret
   resave: false,
   saveUninitialized: false,
-  cookie: {secure: false} 
+  
 }));
 
 // Initialize Passport
@@ -55,5 +59,4 @@ app.use('/v1/orders',orderRoutes );
 const port = process.env.PORT;
 
 app.listen(port, () => {
-    console.log(`Listening on port ${port}...`);
 });

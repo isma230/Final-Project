@@ -1,83 +1,74 @@
 import React, { useState } from "react";
-import Axios from "axios";
-import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
-import Card from '@mui/material/Card';
-import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button';
-import Divider from '@mui/material/Divider';
-import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
-import LoadingButton from '@mui/lab/LoadingButton';
-import { alpha, useTheme } from '@mui/material/styles';
-import InputAdornment from '@mui/material/InputAdornment';
-import { useRouter } from '../../routes/hooks';
-import { bgGradient } from '../../theme/css';
-import Logo from '../../components/logo';
-import Iconify from '../../components/iconify';
+import { useQueryClient } from "react-query";
+import axios from "axios";
+import Swal from "sweetalert2";
+import Box from "@mui/material/Box";
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
+import TextField from "@mui/material/TextField";
+import IconButton from "@mui/material/IconButton";
+import LoadingButton from "@mui/lab/LoadingButton";
+import { alpha, useTheme } from "@mui/material/styles";
+import InputAdornment from "@mui/material/InputAdornment";
+import Iconify from "../../components/iconify";
+import { useRouter } from "../../routes/hooks";
+import { bgGradient } from "../../theme/css";
 
 export default function LoginView() {
   const theme = useTheme();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
 
-  const handleLogin = async () => {
-    try {
-      const response = await Axios.post("http://localhost:5000/v1/users/login", { email, password }, {withCredentials:true});
-  
-      switch (response.status) {
-        case 200:
-          // Success
-          const userData = response.data.user;
-          const token = response.data.token;
-          localStorage.setItem("jwtToken", token);
-          router.push('/');
-          // Display the success message from the backend
-          console.log(response.data.message);
-          break;
-  
-        case 401:
-          // Invalid credentials
-          setError(response.data.message);
-          break;
-  
-        case 403:
-          // User not authorized
-          setError(response.data.message);
-          break;
-  
-        default:
-          // Default handling for other status codes
-          // Display a generic error message from the backend
-          setError(response.data.message);
-          break;
-      }
-    } catch (error) {
-      // Handle request-related errors
-      if (error.response) {
-        // The request was made, but the server responded with a status code different from 2xx
-        setError(error.response.data.message);
-      } else if (error.request) {
-        // The request was made, but no response was received
-        setError("No response received for the request. Please try again.");
-      } else {
-        // An error occurred while configuring the request
-        setError("An error occurred. Please try again.");
-      }
-    }
+  const handleClick = () => {
+    router.push('/dashboard');
   };
-  
+
+  const renderForm = (
+    <>
+      <Stack spacing={3}>
+        <TextField name="email" label="Email address" />
+
+        <TextField
+          name="password"
+          label="Password"
+          type={showPassword ? 'text' : 'password'}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                  <Iconify icon={showPassword ? 'eva:eye-fill' : 'eva:eye-off-fill'} />
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+        />
+      </Stack>
+
+      <Stack direction="row" alignItems="center" justifyContent="flex-end" sx={{ my: 3 }}>
+        <Link variant="subtitle2" underline="hover">
+          Forgot password?
+        </Link>
+      </Stack>
+
+      <LoadingButton
+        fullWidth
+        size="large"
+        type="submit"
+        variant="contained"
+        color="inherit"
+        onClick={handleClick}
+      >
+        Login
+      </LoadingButton>
+    </>
+  );
 
   return (
     <Box
       sx={{
         ...bgGradient({
           color: alpha(theme.palette.background.default, 0.9),
-          imgUrl: '/assets/background/overlay_4.jpg',
+          imgUrl: "/assets/background/overlay_4.jpg",
         }),
         height: 1,
       }}
@@ -145,45 +136,7 @@ export default function LoginView() {
             </Typography>
           </Divider>
 
-          <Stack spacing={3}>
-            <TextField name="email" label="Email address" value={email} onChange={(e) => setEmail(e.target.value)} />
-
-            <TextField
-              name="password"
-              label="Password"
-              type={showPassword ? 'text' : 'password'}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                      <Iconify icon={showPassword ? 'eva:eye-fill' : 'eva:eye-off-fill'} />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </Stack>
-
-          <Stack direction="row" alignItems="center" justifyContent="flex-end" sx={{ my: 3 }}>
-            <Link variant="subtitle2" underline="hover">
-              Forgot password?
-            </Link>
-          </Stack>
-
-          <LoadingButton
-            fullWidth
-            size="large"
-            type="submit"
-            variant="contained"
-            color="inherit"
-            onClick={handleLogin}
-          >
-            Login
-          </LoadingButton>
-
-          {error && <p style={{ textAlign: 'center', color: '#ff0000' }}>{error}</p>}
+          {renderForm}
         </Card>
       </Stack>
     </Box>
