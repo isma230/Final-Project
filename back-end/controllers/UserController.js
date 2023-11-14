@@ -24,17 +24,18 @@ exports.login = async (req, res, next, user, info) => {
 
      // Generate a JWT token
     const token = jwt.sign({ sub: user._id , role: user.role }, process.env.JWT_SECRET_KEY);
-    res.cookie('jwt', token, { httpOnly: true, secure: false}); 
+     
     // Log in the user
     req.logIn(user, (err) => {
       if (err) {
         return next(err);
       }
-      return res.json({ message: 'Login successful', token , user});
+       res.cookie('jwt', token)
+       return res.json({ message: 'Login successful', token , user});
     });
   } catch (err) {
     return next(err);
-  }
+  } 
 };
 
 // Create User (accessible only to Admin users)
