@@ -137,36 +137,74 @@ Nav.propTypes = {
 
 function NavItem({ item }) {
   const pathname = usePathname();
-
   const active = item.path === pathname;
 
-  return (
-    <ListItemButton
-      component={RouterLink}
-      href={item.path}
-      sx={{
-        minHeight: 44,
-        borderRadius: 0.75,
-        typography: 'body2',
-        color: 'text.secondary',
-        textTransform: 'capitalize',
-        fontWeight: 'fontWeightMedium',
-        ...(active && {
-          color: 'primary.main',
-          fontWeight: 'fontWeightSemiBold',
-          bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
-          '&:hover': {
-            bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16),
-          },
-        }),
-      }}
-    >
-      <Box component="span" sx={{ width: 24, height: 24, mr: 2 }}>
-        {item.icon}
-      </Box>
+  const renderSubitems = () => {
+    if (item.subitems) {
+      return (
+        <Stack spacing={0.5}>
+          {item.subitems.map((subItem) => (
+            <ListItemButton
+              key={subItem.title}
+              component={RouterLink}
+              href={subItem.path}
+              sx={{
+                minHeight: 44,
+                borderRadius: 0.75,
+                typography: 'body2',
+                color: 'text.secondary',
+                textTransform: 'capitalize',
+                fontWeight: 'fontWeightMedium',
+                ...(subItem.path === pathname && {
+                  color: 'primary.main',
+                  fontWeight: 'fontWeightSemiBold',
+                  bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
+                  '&:hover': {
+                    bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16),
+                  },
+                }),
+              }}
+            >
+              <Box component="span" sx={{ width: 24, height: 24, mr: 2 }} />
+              <Box component="span">{subItem.title}</Box>
+            </ListItemButton>
+          ))}
+        </Stack>
+      );
+    }
+    return null;
+  };
 
-      <Box component="span">{item.title} </Box>
-    </ListItemButton>
+  return (
+    <>
+      <ListItemButton
+        component={RouterLink}
+        href={item.path}
+        sx={{
+          minHeight: 44,
+          borderRadius: 0.75,
+          typography: 'body2',
+          color: 'text.secondary',
+          textTransform: 'capitalize',
+          fontWeight: 'fontWeightMedium',
+          ...(active && {
+            color: 'primary.main',
+            fontWeight: 'fontWeightSemiBold',
+            bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
+            '&:hover': {
+              bgcolor: (theme) => alpha(theme.palette.primary.main, 0.16),
+            },
+          }),
+        }}
+      >
+        <Box component="span" sx={{ width: 24, height: 24, mr: 2 }}>
+          {item.icon}
+        </Box>
+        <Box component="span">{item.title}</Box>
+      </ListItemButton>
+
+      {renderSubitems()}
+    </>
   );
 }
 
