@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 
-import { AddUserView } from '../sections/user/view';
+import { EditUserView } from '../sections/user/view';
 
 // ----------------------------------------------------------------------
 
@@ -11,7 +11,7 @@ export default function AddUserPage() {
         <title> User | Minimal UI </title>
       </Helmet>
 
-      <AddUserView />
+      <EditUserView />
     </>
   );
 }

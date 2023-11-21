@@ -18,7 +18,6 @@ const navConfig = [
     icon: icon('ic_user'),
     subitems: [
       { title: 'Add New User', path: '/user/adduser' },
-      { title: 'Edit User', path: '/user/edituser' },
     ],
   },
   {

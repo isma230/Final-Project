@@ -1,46 +1,65 @@
-import { useState } from 'react';
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { useRouter } from "../../../routes/hooks";
 
-import Box from '@mui/material/Box';
-import Avatar from '@mui/material/Avatar';
-import Divider from '@mui/material/Divider';
-import Popover from '@mui/material/Popover';
-import { alpha } from '@mui/material/styles';
-import MenuItem from '@mui/material/MenuItem';
-import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
-
-import { account } from '../../../_mock/account';
-
-// ----------------------------------------------------------------------
-
-const MENU_OPTIONS = [
-  {
-    label: 'Home',
-    icon: 'eva:home-fill',
-  },
-  {
-    label: 'Profile',
-    icon: 'eva:person-fill',
-  },
-  {
-    label: 'Settings',
-    icon: 'eva:settings-2-fill',
-  },
-];
-
-// ----------------------------------------------------------------------
+import Box from "@mui/material/Box";
+import Avatar from "@mui/material/Avatar";
+import Divider from "@mui/material/Divider";
+import Popover from "@mui/material/Popover";
+import { alpha } from "@mui/material/styles";
+import MenuItem from "@mui/material/MenuItem";
+import Typography from "@mui/material/Typography";
+import IconButton from "@mui/material/IconButton";
 
 export default function AccountPopover() {
   const [open, setOpen] = useState(null);
+  const router = useRouter();
+  const [account, setAccount] = useState({
+    username: "",
+    email: "",
+    role: "",
+    active: "",
+  });
 
   const handleOpen = (event) => {
     setOpen(event.currentTarget);
   };
 
-  const handleClose = () => {
+  useEffect(() => {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    if (storedUser) {
+      // Update your 'account' state or relevant state with storedUser
+      setAccount(storedUser);
+    }
+  }, []);
+
+  const MENU_OPTIONS = [
+    {
+      label: account.email,
+      icon: "eva:person-fill",
+    },
+    {
+      label: account.active == true ? "Active" : "Inactive",
+    },
+  ];
+
+  const handleLogout = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:5000/v1/users/logout",
+        {
+          withCredentials: true,
+        }
+      );
+      localStorage.removeItem("user");
+      router.push("/login");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const Close = () => {
     setOpen(null);
   };
-
   return (
     <>
       <IconButton
@@ -56,24 +75,22 @@ export default function AccountPopover() {
         }}
       >
         <Avatar
-          src={account.photoURL}
-          alt={account.displayName}
+          src="/assets/images/avatars/avatar_25.jpg"
+          alt="photoURL"
           sx={{
             width: 36,
             height: 36,
             border: (theme) => `solid 2px ${theme.palette.background.default}`,
           }}
-        >
-          {account.displayName.charAt(0).toUpperCase()}
-        </Avatar>
+        ></Avatar>
       </IconButton>
 
       <Popover
         open={!!open}
         anchorEl={open}
-        onClose={handleClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        onClose={Close}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
         PaperProps={{
           sx: {
             p: 0,
@@ -85,28 +102,26 @@ export default function AccountPopover() {
       >
         <Box sx={{ my: 1.5, px: 2 }}>
           <Typography variant="subtitle2" noWrap>
-            {account.displayName}
+            {account.username}
           </Typography>
           <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
-            {account.email}
+            {account.role}
           </Typography>
         </Box>
 
-        <Divider sx={{ borderStyle: 'dashed' }} />
+        <Divider sx={{ borderStyle: "dashed" }} />
 
         {MENU_OPTIONS.map((option) => (
-          <MenuItem key={option.label} onClick={handleClose}>
-            {option.label}
-          </MenuItem>
+          <MenuItem key={option.label}>{option.label}</MenuItem>
         ))}
 
-        <Divider sx={{ borderStyle: 'dashed', m: 0 }} />
+        <Divider sx={{ borderStyle: "dashed", m: 0 }} />
 
         <MenuItem
           disableRipple
           disableTouchRipple
-          onClick={handleClose}
-          sx={{ typography: 'body2', color: 'error.main', py: 1.5 }}
+          onClick={handleLogout}
+          sx={{ typography: "body2", color: "error.main", py: 1.5 }}
         >
           Logout
         </MenuItem>

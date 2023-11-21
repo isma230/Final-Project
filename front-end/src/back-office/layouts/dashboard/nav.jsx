@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useState,useEffect } from 'react';
 import PropTypes from 'prop-types';
 
 import Box from '@mui/material/Box';
@@ -15,9 +15,6 @@ import { RouterLink } from '../../routes/components';
 
 import { useResponsive } from '../../hooks/use-responsive';
 
-import { account } from '../../_mock/account';
-
-import Logo from '../../components/logo';
 import Scrollbar from '../../components/scrollbar';
 
 import { NAV } from './config-layout';
@@ -30,12 +27,28 @@ export default function Nav({ openNav, onCloseNav }) {
 
   const upLg = useResponsive('up', 'lg');
 
+  const [account, setAccount] = useState({
+    username: "",
+    email: "",
+    role: "",
+    active: "",
+  });
+
   useEffect(() => {
     if (openNav) {
       onCloseNav();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
+
+
+  useEffect(() => {
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    if (storedUser) {
+      // Update your 'account' state or relevant state with storedUser
+      setAccount(storedUser);
+    }
+  }, []);
 
   const renderAccount = (
     <Box
@@ -50,10 +63,10 @@ export default function Nav({ openNav, onCloseNav }) {
         bgcolor: (theme) => alpha(theme.palette.grey[500], 0.12),
       }}
     >
-      <Avatar src={account.photoURL} alt="photoURL" />
+      <Avatar src="/assets/images/avatars/avatar_25.jpg" alt="photoURL" />
 
       <Box sx={{ ml: 2 }}>
-        <Typography variant="subtitle2">{account.displayName}</Typography>
+        <Typography variant="subtitle2">{account.username}</Typography>
 
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
           {account.role}
@@ -82,7 +95,6 @@ export default function Nav({ openNav, onCloseNav }) {
         },
       }}
     >
-      <Logo sx={{ mt: 3, ml: 4 }} />
 
       {renderAccount}
 

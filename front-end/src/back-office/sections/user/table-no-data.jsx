@@ -9,18 +9,24 @@ import Typography from '@mui/material/Typography';
 
 export default function TableNoData({ query }) {
   return (
-    <TableRow>
-      <TableCell align="center" colSpan={6} sx={{ py: 3 }}>
+    <TableRow sx={{alignItems:"center",}}>
+      <TableCell align="center" colSpan={12} sx={{ py: 3  }}>
         <Paper
           sx={{
-            textAlign: 'center',
+            p: 1,
+            bgcolor: 'background.neutral',
+            boxShadow: (theme) => theme.customShadows.z8,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
           }}
         >
-          <Typography variant="h6" paragraph>
+          <Typography variant="h6" paragraph align="center">
             Not found
           </Typography>
 
-          <Typography variant="body2">
+          <Typography variant="body2" align="center">
             No results found for &nbsp;
             <strong>&quot;{query}&quot;</strong>.
             <br /> Try checking for typos or using complete words.

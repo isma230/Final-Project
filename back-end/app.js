@@ -17,11 +17,7 @@ require('dotenv').config();
 const app = express();
 const db = require('./config/database');
 const passportSetup = require('./config/passport');
-app.use(cors({
-  origin: 'http://localhost:5173', // your frontend's address
-  // methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  credentials: true,
-}));
+
 
 app.use(cookieParser());
 
@@ -36,7 +32,10 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.json());
-
+app.use(cors({
+  origin: 'http://localhost:5173', // your frontend's address
+  credentials: true, 
+}));
 
 app.use('/v1/users',userRoutes);
 app.use('/v1/customers' ,customerRoutes );
