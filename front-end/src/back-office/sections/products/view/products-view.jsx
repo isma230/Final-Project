@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom'; // Importez Link
 import Axios from 'axios';
 
 import Box from '@mui/material/Box';
@@ -7,14 +8,11 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 
-import { products } from '../../../_mock/products';
-
+// Importez les composants nécessaires ici
 import ProductCard from '../product-card';
 import ProductSort from '../product-sort';
 import ProductFilters from '../product-filters';
 import ProductCartWidget from '../product-cart-widget';
-
-
 
 export default function ProductsView() {
   const [products, setProducts] = useState([]);
@@ -32,7 +30,8 @@ export default function ProductsView() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await Axios.get("http://localhost:5000/v1/products" , {withCredentials:true});
+        const response = await Axios.get("http://localhost:5000/v1/products", { withCredentials: true });
+        console.log("Response :", response.data);
         const productList = response.data;
 
         setProducts(productList);
@@ -45,19 +44,16 @@ export default function ProductsView() {
     fetchProducts();
   }, []);
 
-  // Remplacez productId par id pour correspondre à votre objet produit
-  const renderProductCard = (product) => (
-    <Grid key={product.id} xs={12} sm={6} md={3}>
-      {/* Vous devrez peut-être ajuster les propriétés en fonction de votre objet produit réel */}
-      <ProductCard product={product} />
-    </Grid>
-  );
-
   return (
     <Container>
-      <Typography variant="h4" sx={{ mb: 5 }}>
-        Products
-      </Typography>
+      <Stack
+        direction="row"
+        alignItems="center"
+        justifyContent="space-between"
+        mb={5}
+      >
+        <Typography variant="h4">Products</Typography>
+      </Stack>
 
       <Stack
         direction="row"
@@ -67,23 +63,22 @@ export default function ProductsView() {
         sx={{ mb: 5 }}
       >
         <Stack direction="row" spacing={1} flexShrink={0} sx={{ my: 1 }}>
-          {/* Utilisez ProductFilters ici */}
           <ProductFilters
             openFilter={openFilter}
             onOpenFilter={handleOpenFilter}
             onCloseFilter={handleCloseFilter}
           />
-
-          {/* Ajoutez ProductSort ici */}
           <ProductSort />
         </Stack>
       </Stack>
 
-      <Grid container spacing={3}>
-        {products.map(renderProductCard)}
+      <Grid container spacing={3} >
+        {products.map((product) => (
+          <Grid item xs={12} sm={6} md={3} key={product._id}>
+            <ProductCard product={product} />
+          </Grid>
+        ))}
       </Grid>
-
-      {/* Ajoutez ProductCartWidget ici */}
       <ProductCartWidget />
     </Container>
   );

@@ -21,15 +21,25 @@ exports.login = async (req, res, next, user, info) => {
   try {
     // Save the user with the updated last login date
     await user.save();
-
+    
+    const cookieOptions = {
+      secret: process.env.SESSION_SECRET_KEY, // Change this to a strong, random secret
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+    httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'None', // Permet le partage avec des sites tiersier
+    }};
+    
      // Generate a JWT token
     const token = jwt.sign({ sub: user._id , role: user.role }, process.env.JWT_SECRET_KEY);
-    res.cookie('jwt', token, { httpOnly: true, secure: false}); 
     // Log in the user
     req.logIn(user, (err) => {
       if (err) {
         return next(err);
       }
+      res.cookie('jwt', token , cookieOptions);
       return res.json({ message: 'Login successful', token });
     });
   } catch (err) {

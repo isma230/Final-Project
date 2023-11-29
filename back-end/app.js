@@ -10,29 +10,16 @@ const productRoutes = require('./routes/ProductRoutes');
 const cookieParser = require('cookie-parser');
 //call the .env file
 require('dotenv').config();
+const cors = require('cors');
 
 
 // Initialize Express 
 const app = express(); // Déplacez cette ligne ici
-
-const corsOptions = {
-  origin: 'http://localhost:5173', // Remplacez par l'URL de votre application frontend
-  // methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  // allowedHeaders: 'Content-Type,Authorization',
-};
-
-app.use(cors({
-  origin: 'http://localhost:5173',
-  credentials: true
-})); // Utilisez le middleware CORS après l'initialisation de l'application
+app.use(express.static('public'));
 
 const db = require('./config/database');
 const passportSetup = require('./config/passport');
-app.use(cors({
-  origin: 'http://localhost:5173', // your frontend's address
-  // methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  credentials: true,
-}));
+
 
 app.use(cookieParser());
 
@@ -41,8 +28,19 @@ app.use(session({
   secret: process.env.SESSION_SECRET_KEY, // Change this to a strong, random secret
   resave: false,
   saveUninitialized: false,
-  
+  cookie: {
+    httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'None', // Permet le partage avec des sites tiersiers
+  }
 }));
+
+app.use(cors({
+  origin: 'http://localhost:5173', // your frontend's address
+  // methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+})); // Utilisez le middleware CORS après l'initialisation de l'application
+
 
 // Initialize Passport
 app.use(passport.initialize());
@@ -57,6 +55,9 @@ app.use('/v1/products', productRoutes);
 app.use('/v1/orders',orderRoutes );
 
 const port = process.env.PORT;
+// Start the server
+
 
 app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });

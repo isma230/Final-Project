@@ -6,7 +6,7 @@ const formidable = require('express-formidable');
 
 // POST route to create a new product
 router.post('/', isAuthenticated , formidable({
-        uploadDir: 'productsimages', // Set your upload directory
+        uploadDir: 'public/uploads', // Set your upload directory
         keepExtensions: true, // Keep file extensions
       }), ProductController.createProduct);
 
@@ -17,10 +17,10 @@ router.get('/', isAuthenticated, ProductController.listProducts);
 router.get('/search', isAuthenticated , ProductController.searchProducts);
 
 // GET route to search products by ID
-router.get('/search/:id', isAuthenticated , ProductController.getProductById);
+router.get('/:id', isAuthenticated , ProductController.getProductById);
 
 // PUT route to update a product by ID 
-router.patch('/:id', isAuthenticated , formidable({
+router.patch('/${id}', isAuthenticated , formidable({
     uploadDir: 'productsimages', // Set your upload directory
     keepExtensions: true, // Keep file extensions
   }), ProductController.updateProduct);

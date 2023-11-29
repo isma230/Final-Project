@@ -23,11 +23,11 @@ const navConfig = [
   },
   {
     title: 'product',
-    path: '/products',
+    path: '/product',
     icon: icon('ic_product'),
     subitems: [
-      { title: 'Add New Product', path: '/products/addproduct' },
-      { title: 'Edit Product', path: '/products/editproduct' },
+      { title: 'Add New Product', path: '/product/addproduct' },
+      { title: 'Edit Product', path: '/product/editproduct' },
     ],
   },
   {

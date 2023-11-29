@@ -95,7 +95,7 @@ exports.listProducts = async (req, res) => {
       },
       {
         $project: {
-          _id: 0, // Exclude _id field
+          _id: 1, // Exclude _id field
           categoryName: '$subcategory.subcategory_name', // Include the subcategory name
           product_name: 1,
           product_image: 1,

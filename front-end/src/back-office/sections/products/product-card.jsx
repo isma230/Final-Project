@@ -1,20 +1,17 @@
 import PropTypes from 'prop-types';
-
 import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-
+import Button from '@mui/material/Button';
 import { fCurrency } from '../../utils/format-number';
-
+import { Link } from 'react-router-dom';
 import Label from '../../components/label';
 import { ColorPreview } from '../../components/color-utils';
 
-// ----------------------------------------------------------------------
-
 export default function ShopProductCard({ product }) {
-  const renderStatus = (
+  console.log("Produit :", product);
+  const renderStatus = product.status && (
     <Label
       variant="filled"
       color={(product.status === 'sale' && 'error') || 'info'}
@@ -30,11 +27,11 @@ export default function ShopProductCard({ product }) {
     </Label>
   );
 
-  const renderImg = (
+  const renderImg = product.product_image && (
     <Box
       component="img"
       alt={product.name}
-      src={product.cover}
+      src={"http://localhost:5000/uploads/" + product.product_image.split("\\").at(-1)}
       sx={{
         top: 0,
         width: 1,
@@ -47,17 +44,6 @@ export default function ShopProductCard({ product }) {
 
   const renderPrice = (
     <Typography variant="subtitle1">
-      <Typography
-        component="span"
-        variant="body1"
-        sx={{
-          color: 'text.disabled',
-          textDecoration: 'line-through',
-        }}
-      >
-        {product.priceSale && fCurrency(product.priceSale)}
-      </Typography>
-      &nbsp;
       {fCurrency(product.price)}
     </Typography>
   );
@@ -65,25 +51,51 @@ export default function ShopProductCard({ product }) {
   return (
     <Card>
       <Box sx={{ pt: '100%', position: 'relative' }}>
-        {product.status && renderStatus}
-
+        {renderStatus}
         {renderImg}
       </Box>
 
       <Stack spacing={2} sx={{ p: 3 }}>
-        <Link color="inherit" underline="hover" variant="subtitle2" noWrap>
-          {product.name}
-        </Link>
+      <Typography color="inherit" underline="hover" variant="subtitle2" noWrap>
+          {product.product_name}
+        </Typography>
 
         <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <ColorPreview colors={product.colors} />
+          {product.colors && <ColorPreview colors={product.colors} />}
           {renderPrice}
         </Stack>
-      </Stack>
+        
+
+        <Typography variant="body2">{product.short_description}</Typography>
+
+        <Typography variant="body2">{product.long_description}</Typography>
+
+        {/* Boutons d'ajout et de suppression */}
+        <Stack direction="row" spacing={2}>
+          <Link to={`/product/editproduct/${product._id}`}>
+  <Button variant="contained" color="primary">
+    Edit
+  </Button>
+</Link>
+          <Button variant="contained" color="error" onClick={() => handleDelete(product._id)}>
+            Delete
+          </Button>
+        </Stack>
+      </Stack>      
     </Card>
   );
 }
 
 ShopProductCard.propTypes = {
-  product: PropTypes.object,
+  product: PropTypes.shape({
+    status: PropTypes.string, 
+    product_image: PropTypes.string,
+    name: PropTypes.string,
+    price: PropTypes.number,
+    discount_price: PropTypes.number,
+    colors: PropTypes.arrayOf(PropTypes.string),
+    short_description: PropTypes.string,
+    long_description: PropTypes.string,
+    // Ajoutez d'autres propriétés du produit ici
+  }),
 };
