@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useMutation, useQueryClient } from "react-query";
+import React, { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "react-query";
 import axios from "axios";
 import Swal from "sweetalert2";
 import Card from "@mui/material/Card";
@@ -9,31 +9,65 @@ import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
 import TextField from "@mui/material/TextField";
 import Iconify from "../../../components/iconify";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
+import { useParams } from "react-router-dom";
+import {useRouter} from "../../../routes/hooks";
 
-const AddUserPage = () => {
-  const queryClient = useQueryClient();
+const EditUserPage = () => {
+    const params = useParams();
+    const userId = params.id;
+    const router = useRouter();
+   const queryClient = useQueryClient();
 
-  const [formData, setFormData] = useState({
+   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
     email: "",
     role: "",
     user_name: "",
+    active: "",
     password: "",
     roleOptions: ["Admin", "Manager"],
+    activeOptions: ["true", "false"],
   });
 
+  const { data: user, isLoading } = useQuery(["user", userId], async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:5000/v1/users/details/${userId}`,
+        {
+          withCredentials: true,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  });
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        first_name: user.first_name,
+        last_name: user.last_name,
+        email: user.email,
+        role: user.role,
+        user_name: user.user_name,
+        active: user.active,
+        password: user.password,
+        roleOptions: ["Admin", "Manager"],
+        activeOptions: ["true", "false"],
+      });
+    }
+  }, [user]);
+
   const isFormValid = () => {
-    // Check if all required fields have values
     return (
       formData.first_name &&
       formData.last_name &&
       formData.email &&
       formData.role &&
+      formData.active &&
       formData.user_name &&
       formData.password
     );
@@ -43,11 +77,11 @@ const AddUserPage = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const addUser = async (newUser) => {
+  const updateUser = async (updatedUser) => {
     try {
-      const response = await axios.post(
-        "http://localhost:5000/v1/users/create-user",
-        newUser,
+      const response = await axios.put(
+        `http://localhost:5000/v1/users/${userId}`,
+        updatedUser,
         {
           withCredentials: true,
         }
@@ -58,20 +92,19 @@ const AddUserPage = () => {
     }
   };
 
-  const queryKey = "users";
-
-  const mutation = useMutation(addUser, {
+  const mutation = useMutation(updateUser, {
     onSuccess: (data, variables, context) => {
-      // Handle success
       Swal.fire({
         title: "Success!",
-        text: "User added successfully!",
+        text: "User updated successfully!",
         icon: "success",
         confirmButtonText: "OK",
       });
+      setTimeout(() => {
+        router.push("/user");
+      }, 1500);
     },
     onError: (error, variables, context) => {
-      // Handle error
       Swal.fire({
         title: "Error!",
         text: error,
@@ -80,17 +113,7 @@ const AddUserPage = () => {
       });
     },
     onSettled: (data, error, variables, context) => {
-      // Reset loading state
-      queryClient.invalidateQueries(queryKey);
-      setFormData({
-        first_name: "",
-        last_name: "",
-        email: "",
-        role: "",
-        user_name: "",
-        password: "",
-        roleOptions: formData.roleOptions,
-      });
+      queryClient.invalidateQueries(["user", userId]);
     },
   });
 
@@ -98,6 +121,10 @@ const AddUserPage = () => {
     e.preventDefault();
     mutation.mutate(formData);
   };
+
+  if (isLoading) {
+    return <Typography>Loading...</Typography>;
+  }
 
   return (
     <Container>
@@ -107,7 +134,7 @@ const AddUserPage = () => {
         justifyContent="space-between"
         mb={5}
       >
-        <Typography variant="h4">Add New User</Typography>
+        <Typography variant="h4">Edit User</Typography>
       </Stack>
 
       <Card>
@@ -140,28 +167,41 @@ const AddUserPage = () => {
             <TextField
               label="Email"
               variant="outlined"
-              type="email"
               fullWidth
               name="email"
               value={formData.email}
               onChange={handleChange}
             />
-            <FormControl variant="outlined" fullWidth>
-              <InputLabel htmlFor="role">Role</InputLabel>
-              <Select
-                label="Role"
-                id="role"
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-              >
-                {formData.roleOptions.map((role) => (
-                  <MenuItem key={role} value={role}>
-                    {role}
-                  </MenuItem>
+            <TextField
+              label="Role"
+              variant="outlined"
+              fullWidth
+              name="role"
+              select
+              value={formData.role}
+              onChange={handleChange}
+            >
+              {formData.roleOptions.map((role) => (
+                <MenuItem key={role} value={role}>
+                  {role}
+                </MenuItem>
+              ))}
+            </TextField>
+            <TextField
+              label="Active Status"
+              variant="outlined"
+              fullWidth
+              name="active"
+              select
+              value={formData.active}
+              onChange={handleChange}
+            >
+                {formData.activeOptions.map((active) => (
+                    <MenuItem key={active} value={active}>
+                    {active}
+                    </MenuItem>
                 ))}
-              </Select>
-            </FormControl>
+            </TextField>
             <TextField
               label="Password"
               variant="outlined"
@@ -170,15 +210,16 @@ const AddUserPage = () => {
               name="password"
               value={formData.password}
               onChange={handleChange}
+              disabled
             />
             <Button
               type="submit"
               variant="contained"
               color="primary"
-              startIcon={<Iconify icon="eva:plus-fill" />}
-              disabled={!isFormValid() || mutation.isLoading}
+              startIcon={<Iconify icon="eva:save-fill" />}
+              disabled={!isFormValid() || mutation.isLoading}    
             >
-              {mutation.isLoading ? "Adding..." : "Add User"}
+              {mutation.isLoading ? "Updating..." : "Update User"}
             </Button>
           </Stack>
         </form>
@@ -187,4 +228,4 @@ const AddUserPage = () => {
   );
 };
 
-export default AddUserPage;
+export default EditUserPage;

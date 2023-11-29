@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useQueryClient } from "react-query";
 import axios from "axios";
-import Swal from "sweetalert2";
+import toast, { Toaster } from "react-hot-toast";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
@@ -32,42 +32,48 @@ export default function LoginView() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
+      const config = {
+          withCredentials: true
+        }
       const response = await axios.post(
-        "http://127.0.0.1:5000/v1/users/login",
+        "http://localhost:5000/v1/users/login",
         {
           email: formData.email,
           password: formData.password,
         },
-        { withCredentials: true }
+        config
       );
       // Invalidate and refetch any queries that depend on user data
       queryClient.invalidateQueries("userData");
 
-      Swal.fire({
-        icon: "success",
-        title: "Login Successful",
-        text: "You have successfully logged in.",
-      });
+      toast.success("Login successful!");
 
-      // Navigate to the dashboard
+      setTimeout(() => {
+        // Navigate to the dashboard
         router.push("/");
+      }, 1500);
     } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Login Failed",
-        text: "Invalid email or password. Please try again.",
-      });
+      toast.error(error.response.data.message);
     }
   };
 
+
+
   const renderForm = (
     <Stack spacing={3}>
-      <TextField name="email" label="Email address" onChange={handleChange} />
+      <TextField
+        name="email"
+        label="Email address"
+        type="email"
+        onChange={handleChange}
+        required
+      />
       <TextField
         name="password"
         label="Password"
         onChange={handleChange}
         type={showPassword ? "text" : "password"}
+        required
         InputProps={{
           endAdornment: (
             <InputAdornment position="end">
@@ -90,7 +96,7 @@ export default function LoginView() {
         type="submit"
         variant="contained"
         color="inherit"
-        onClick={(e)=>handleLogin(e)}
+        onClick={(e) => handleLogin(e)}
       >
         Login
       </LoadingButton>
@@ -110,6 +116,7 @@ export default function LoginView() {
         justifyContent: "center",
       }}
     >
+      <Toaster />
       <Paper sx={{ p: 5, width: 1, maxWidth: 420 }}>{renderForm}</Paper>
 
       </Box>
