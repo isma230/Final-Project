@@ -13,10 +13,12 @@ import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
+import { useRouter } from "../../../routes/hooks";
 
 const EditProductPage = () => {
   const queryClient = useQueryClient();
   const { id } = useParams();
+  const router = useRouter();
 
   const [formData, setFormData] = useState({
     product_name: '',
@@ -24,7 +26,7 @@ const EditProductPage = () => {
     short_description: '',
     price: '',
     discount_price: '',
-    subcategory_id: '',
+    subcategory_id: "",
     options: '',
     product_image: null,
   });
@@ -32,10 +34,8 @@ const EditProductPage = () => {
   const handleChange = (e) => {
     if (e.target.name === 'product_image') {
       setFormData({ ...formData, [e.target.name]: e.target.files[0] });
-    } else if (e.target.name === 'subcategory_id') {
-      setFormData({ ...formData, subcategory_id: e.target.value });
     } else {
-      setFormData({ ...formData, [e.target.name]: e.target.value });
+      setFormData({ ...formData, [e.target.name]: e.target.value  });
     }
   };
 
@@ -101,7 +101,8 @@ const EditProductPage = () => {
 
   const mutation = useMutation(editProduct, {
     onSuccess: (data, variables, context) => {
-      // Handle success
+      // Redirigez vers la page des produits
+      router.push('/products');
     },
     onError: (error, variables, context) => {
       // Handle error
@@ -160,6 +161,7 @@ const EditProductPage = () => {
               type="file"
               name="product_image"
               onChange={handleChange}
+              // value={formData.product_image}
             />
             <Button variant="contained" component="label" htmlFor="upload-button">
               Upload Product Image
@@ -191,10 +193,9 @@ const EditProductPage = () => {
                 value={formData.subcategory_id}
                 onChange={handleChange}
               >
-                {/* Replace the array below with the actual list of subcategories */}
-                <MenuItem value="65577de8a1be2cfe93202502">Subcategory 1</MenuItem>
-                <MenuItem value="subcategory2">Subcategory 2</MenuItem>
-                {/* ... */}
+                <MenuItem value={""}>None</MenuItem>
+                <MenuItem value={"65577de8a1be2cfe93202502"}>Subcategory 1</MenuItem>
+                <MenuItem value={"subcategory2"}>Subcategory 2</MenuItem>
               </Select>
             </FormControl>
 

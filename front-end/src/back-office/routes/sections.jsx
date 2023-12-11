@@ -59,10 +59,14 @@ export default function Router() {
         {
           path: 'products',
           element: <ProductsPage />,
-          children: [
-            { path: 'addproduct', element: <ProductsPage /> },
-            { path: 'editproduct', element: <ProductsPage /> },
-          ],
+        },
+        {
+          path: 'products/addproduct',
+          element: <AddProductPage />,
+        },
+        {
+          path: 'products/editproduct/:id',
+          element: <EditProductPage />,
         },
         {
           path: "customer",

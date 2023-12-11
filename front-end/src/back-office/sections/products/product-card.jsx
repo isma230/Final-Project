@@ -8,6 +8,8 @@ import { fCurrency } from '../../utils/format-number';
 import { Link } from 'react-router-dom';
 import Label from '../../components/label';
 import { ColorPreview } from '../../components/color-utils';
+import axios from 'axios';
+import { useQueryClient } from 'react-query'; 
 
 export default function ShopProductCard({ product }) {
   console.log("Produit :", product);
@@ -41,6 +43,20 @@ export default function ShopProductCard({ product }) {
       }}
     />
   );
+  const queryClient = useQueryClient();
+  const handleDelete = async (_id) => {
+    try {
+      await axios.delete(`http://localhost:5000/v1/products/${_id}`, {
+        withCredentials: true,
+        // Ajouter d'autres headers au besoin (par exemple, le token d'authentification)
+      });
+  
+      // Invalider et refaire la requête pour obtenir la liste des produits
+      queryClient.invalidateQueries('products');
+    } catch (error) {
+      console.error('Erreur lors de la suppression du produit :', error);
+    }
+  };
 
   const renderPrice = (
     <Typography variant="subtitle1">
@@ -56,7 +72,7 @@ export default function ShopProductCard({ product }) {
       </Box>
 
       <Stack spacing={2} sx={{ p: 3 }}>
-      <Typography color="inherit" underline="hover" variant="subtitle2" noWrap>
+        <Typography color="inherit" underline="hover" variant="subtitle2" noWrap>
           {product.product_name}
         </Typography>
 
@@ -64,7 +80,7 @@ export default function ShopProductCard({ product }) {
           {product.colors && <ColorPreview colors={product.colors} />}
           {renderPrice}
         </Stack>
-        
+
 
         <Typography variant="body2">{product.short_description}</Typography>
 
@@ -72,23 +88,23 @@ export default function ShopProductCard({ product }) {
 
         {/* Boutons d'ajout et de suppression */}
         <Stack direction="row" spacing={2}>
-          <Link to={`/product/editproduct/${product._id}`}>
-  <Button variant="contained" color="primary">
-    Edit
-  </Button>
-</Link>
+          <Link to={`/products/editproduct/${product._id}`}>
+            <Button variant="contained" color="primary">
+              Edit
+            </Button>
+          </Link>
           <Button variant="contained" color="error" onClick={() => handleDelete(product._id)}>
             Delete
           </Button>
         </Stack>
-      </Stack>      
+      </Stack>
     </Card>
   );
 }
 
 ShopProductCard.propTypes = {
   product: PropTypes.shape({
-    status: PropTypes.string, 
+    status: PropTypes.string,
     product_image: PropTypes.string,
     name: PropTypes.string,
     price: PropTypes.number,

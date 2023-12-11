@@ -32,17 +32,26 @@ export default function LoginView() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const config = {
-          withCredentials: true
-        }
+      if (!formData.email || !formData.password) {
+        toast.error("Please enter your email and password.");
+        return;
+      }
       const response = await axios.post(
         "http://localhost:5000/v1/users/login",
         {
           email: formData.email,
           password: formData.password,
         },
-        config
+        {
+          withCredentials: true,
+        }
       );
+      // Retrieve user information from the response
+      const { user } = response.data;
+
+      // Put user information in local storage
+      localStorage.setItem("user", JSON.stringify(user));
+
       // Invalidate and refetch any queries that depend on user data
       queryClient.invalidateQueries("userData");
 
@@ -118,7 +127,6 @@ export default function LoginView() {
     >
       <Toaster />
       <Paper sx={{ p: 5, width: 1, maxWidth: 420 }}>{renderForm}</Paper>
-
-      </Box>
+    </Box>
   );
 }

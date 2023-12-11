@@ -20,26 +20,13 @@ router.get('/search', isAuthenticated , ProductController.searchProducts);
 router.get('/:id', isAuthenticated , ProductController.getProductById);
 
 // PUT route to update a product by ID 
-router.patch('/${id}', isAuthenticated , formidable({
-    uploadDir: 'productsimages', // Set your upload directory
+router.patch('/:id', isAuthenticated , formidable({
+    uploadDir: 'public/uploads', // Set your upload directory
     keepExtensions: true, // Keep file extensions
   }), ProductController.updateProduct);
 
 // DELETE route to delete a category by ID
  router.delete('/:id', isAuthenticated, ProductController.deleteProductById);
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 module.exports = router;

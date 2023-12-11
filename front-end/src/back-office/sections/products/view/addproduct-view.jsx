@@ -14,9 +14,11 @@ import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 // import { Button } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 const AddProductPage = () => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate()
 
   const [formData, setFormData] = useState({
     product_name: '',
@@ -67,6 +69,7 @@ const AddProductPage = () => {
         },
         withCredentials: true,
       };
+      console.log(formData);
       const response = await axios.post(
         'http://localhost:5000/v1/products',
         formData,
@@ -96,6 +99,7 @@ const AddProductPage = () => {
         icon: 'success',
         confirmButtonText: 'OK',
       });
+      navigate('/products');
     },
     onError: (error, variables, context) => {
       Swal.fire({
@@ -119,8 +123,29 @@ const AddProductPage = () => {
     },
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+  
+    // Vérifiez si le produit avec le SKU donné existe déjà
+    try {
+      const response = await axios.get(`http://localhost:5000/v1/products/${formData.sku}`, { withCredentials: true });
+  
+      if (response.data) {
+        // Si le produit existe déjà, informez l'utilisateur et arrêtez la fonction
+        Swal.fire({
+          title: 'Error!',
+          text: 'Product SKU already exists',
+          icon: 'error',
+          confirmButtonText: 'OK',
+        });
+        return;
+      }
+    } catch (error) {
+      // Gérez les erreurs de la requête GET
+      console.error("Error fetching product:", error);
+    }
+  
+    // Si le produit n'existe pas déjà, continuez avec la mutation
     mutation.mutate(formData);
   };
 
@@ -225,6 +250,7 @@ const AddProductPage = () => {
               color="primary"
               startIcon={<Iconify icon="eva:plus-fill" />}
               disabled={!isFormValid() || mutation.isLoading}
+              onClick={handleSubmit}
             >
               {mutation.isLoading ? 'Adding...' : 'Add Product'}
             </Button>
