@@ -1,5 +1,6 @@
 const Subcategory = require('../models/SubCategoryModel'); // Import your Subcategory model
 const Product = require('../models/ProductModel'); // Import your Product model
+const Category = require('../models/CategoryModel'); // Import your Category model
 // Function to create a new subcategory
 exports.createSubcategory = async (req, res) => {
   try {
@@ -12,6 +13,13 @@ exports.createSubcategory = async (req, res) => {
 
     const { subcategory_name, category_id } = req.body;
 
+    // Check if the category exists
+    const category = await Category.findById(category_id);
+
+    if (!category) {
+      return res.status(400).json({ message: 'Category does not exist' });
+    }
+ 
     // Check if the subcategory name is unique
     const existingSubcategory = await Subcategory.findOne({ subcategory_name });
 
@@ -29,7 +37,7 @@ exports.createSubcategory = async (req, res) => {
 
     res.status(201).json({ message: 'Subcategory created successfully', subcategory: newSubcategory });
   } catch (error) {
-    console.error(error);
+    console.error(error); 
     res.status(500).json({ message: 'Internal server error' });
   }
 };
@@ -41,9 +49,9 @@ exports.listOrSearchSubcategories = async (req, res) => {
     const rolesAllowedToAccess = ["Admin", "Manager"];
 
     // Check if the user's role is allowed to access this functionality
-    if (!rolesAllowedToAccess.includes(req.user.role)) {
-      return res.status(403).json({ message: "Access denied. You do not have the required role." });
-    }
+    // if (!rolesAllowedToAccess.includes(req.user.role)) {
+    //   return res.status(403).json({ message: "Access denied. You do not have the required role." });
+    // }
 
     const pageNumber = parseInt(page);
     const limitNumber = parseInt(limit);

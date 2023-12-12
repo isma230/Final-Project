@@ -62,7 +62,7 @@ export default function UserTableRow({
             onClick={(event) => event.stopPropagation()} // Stop propagation for checkbox clicks
           />
         </TableCell>
-        <TableCell component="th" scope="row" padding="none">
+        <TableCell  scope="row" padding="none">
           <Stack direction="row" alignItems="center" spacing={2}>
             <Typography variant="subtitle2" noWrap>
               {name}

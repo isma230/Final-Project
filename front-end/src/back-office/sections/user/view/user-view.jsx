@@ -23,6 +23,7 @@ import UserTableToolbar from "../user-table-toolbar";
 import { emptyRows, applyFilter, getComparator } from "../utils";
 import { Link } from "react-router-dom";
 import { useRouter } from "../../../routes/hooks";
+import { bg } from "date-fns/esm/locale";
 export default function UserPage() {
   const [page, setPage] = useState(0);
   const [order, setOrder] = useState("asc");
@@ -68,7 +69,7 @@ export default function UserPage() {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelecteds = users.map((user) => user.user_name);
+      const newSelecteds = users.map((user) => user._id);
       setSelected(newSelecteds);
       return;
     }
@@ -168,7 +169,7 @@ export default function UserPage() {
     if (selected.length !== 1) {
       Swal.fire("Error", "Please select only one user to edit.", "error");
     } else {
-      router.push(`/user/edituser/${selected[0]}`);
+      router.push(`/back-office/user/edituser/${selected[0]}`);
     }
     setSelected([]);
   };
@@ -182,7 +183,7 @@ export default function UserPage() {
         mb={5}
       >
         <Typography variant="h4">Users</Typography>
-        <Link to="/user/adduser">
+        <Link to="/back-office/user/adduser">
           <Button
             variant="contained"
             color="inherit"
@@ -228,34 +229,33 @@ export default function UserPage() {
                   ]}
                 />
                 <TableBody>
-                  {dataFiltered
-                    .map((row) => (
-                      <UserTableRow
-                        key={row._id}
-                        id={row._id} // Pass the user ID as "id" prop
-                        name={row.user_name}
-                        firstname={row.first_name}
-                        lastname={row.last_name}
-                        role={row.role}
-                        email={row.email}
-                        active={row.active}
-                        lastUpdate={
-                          row.last_update
-                            ? new Date(row.last_update).toLocaleDateString()
-                            : "N/A"
-                        }
-                        lastLogin={
-                          row.last_login
-                            ? new Date(row.last_login).toLocaleDateString()
-                            : "N/A"
-                        }
-                        creationDate={new Date(
-                          row.creation_date
-                        ).toLocaleDateString()}
-                        selected={selected.indexOf(row._id) !== -1}
-                        handleClick={(event) => handleClick(event, row._id)}
-                      />
-                    ))}
+                  {dataFiltered.map((row) => (
+                    <UserTableRow
+                      key={row._id}
+                      id={row._id} // Pass the user ID as "id" prop
+                      name={row.user_name}
+                      firstname={row.first_name}
+                      lastname={row.last_name}
+                      role={row.role}
+                      email={row.email}
+                      active={row.active}
+                      lastUpdate={
+                        row.last_update
+                          ? new Date(row.last_update).toLocaleDateString()
+                          : "N/A"
+                      }
+                      lastLogin={
+                        row.last_login
+                          ? new Date(row.last_login).toLocaleDateString()
+                          : "N/A"
+                      }
+                      creationDate={new Date(
+                        row.creation_date
+                      ).toLocaleDateString()}
+                      selected={selected.indexOf(row._id) !== -1}
+                      handleClick={(event) => handleClick(event, row._id)}
+                    />
+                  ))}
                   <TableEmptyRows
                     height={77}
                     emptyRows={emptyRows(page, rowsPerPage)}

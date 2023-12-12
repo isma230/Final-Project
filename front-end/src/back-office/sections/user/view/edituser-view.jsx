@@ -63,13 +63,12 @@ const EditUserPage = () => {
 
   const isFormValid = () => {
     return (
-      formData.first_name &&
-      formData.last_name &&
-      formData.email &&
-      formData.role &&
-      formData.active &&
-      formData.user_name &&
-      formData.password
+      formData.first_name.trim() !== "" &&
+      formData.last_name.trim() !== "" &&
+      formData.email.trim() !== "" &&
+      formData.role.trim() !== "" &&
+      formData.user_name.trim() !== "" &&
+      formData.password.trim() !== "" 
     );
   };
 

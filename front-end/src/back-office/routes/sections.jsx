@@ -13,7 +13,15 @@ export const ProductsPage = lazy(() => import("../pages/products"));
 export const Page404 = lazy(() => import("../pages/page-not-found"));
 export const AddUserPage = lazy(() => import("../pages/addUser"));
 export const EditUserPage = lazy(() => import("../pages/editUser"));
-
+export const CustomerPage = lazy(() => import("../pages/customer"));
+export const EditCustomerPage = lazy(() => import("../pages/editCustomer"));
+export const TransactionList = lazy(() => import("../pages/paymentPage"));
+export const CategoryPage = lazy(() => import("../pages/category"));
+export const EditCategoryPage = lazy(() => import("../pages/editCategory"));
+export const AddCategoryPage = lazy(() => import("../pages/addCategory"));
+export const SubCategoryPage = lazy(() => import("../pages/subcategory"));
+export const AddSubCategoryPage = lazy(() => import("../pages/addSubCategory"));
+export const EditSubCategoryPage = lazy(() => import("../pages/editSubCategory"));
 // ----------------------------------------------------------------------
 // Higher Order Component for Protected Routes
 const ProtectedRoute = ({ children }) => {
@@ -43,7 +51,7 @@ export default function Router() {
       children: [
         { element: <IndexPage />, index: true },
         {
-          path: "user",
+          path: "/user",
           element: <UserPage />,
         },
         {
@@ -60,8 +68,27 @@ export default function Router() {
         },
         {
           path: "customer",
-          element: <BlogPage />,
-          children: [{ path: "editcustomer", element: <BlogPage /> }],
+          element: <CustomerPage />,
+        },
+        {
+          path: "category",
+          element: <CategoryPage />,
+        },
+        {
+          path: "category/addcategory",
+          element: <AddCategoryPage />,
+        },
+        {
+          path: "subcategory",
+          element: <SubCategoryPage />,
+        },
+        {
+          path: "subcategory/addsubcategory",
+          element: <AddSubCategoryPage />,
+        },
+        {
+          path: "subcategory/addsubcategory",
+          element: <AddCategoryPage />,
         },
         {
           path: "orders",
@@ -74,6 +101,22 @@ export default function Router() {
       element: <EditUserPage />,
     },
     {
+      path: "customer/editcustomer/:id",
+      element: <EditCustomerPage />,
+    },
+    {
+      path: "category/editcategory/:id",
+      element: <EditCategoryPage />,
+    },
+    {
+      path: "subcategory/editsubcategory/:id",
+      element: <EditSubCategoryPage />,
+    },
+    {
+      path: "payment",
+      element: <TransactionList />,
+    },
+    {
       path: "login",
       element: <LoginPage />,
     },
@@ -81,10 +124,10 @@ export default function Router() {
       path: "404",
       element: <Page404 />,
     },
-    {
-      path: "*",
-      element: <Navigate to="/404" replace />,
-    },
+    // {
+    //   path: "*",
+    //   element: <Navigate to="/404" replace />,
+    // },
   ]);
 
   return routes;

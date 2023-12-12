@@ -4,7 +4,7 @@ import { EditUserView } from '../sections/user/view';
 
 // ----------------------------------------------------------------------
 
-export default function AddUserPage() {
+export default function EditUserPage() {
   return (
     <>
       <Helmet>

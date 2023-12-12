@@ -38,14 +38,14 @@ exports.createCategory = async (req, res) => {
 exports.listOrSearchCategories = async (req, res) => {
     try {
       const { query, page, limit = 10 } = req.query;
-      const rolesAllowedToAccess = ["Admin", "Manager"];
+      // const rolesAllowedToAccess = ["Admin", "Manager"];
   
-      // Check if the user's role is allowed to access this functionality
-      if (!rolesAllowedToAccess.includes(req.user.role)) {
-        return res
-          .status(403)
-          .json({ message: "Access denied. You do not have the required role." });
-      }
+      // // Check if the user's role is allowed to access this functionality
+      // if (!rolesAllowedToAccess.includes(req.user.role)) {
+      //   return res
+      //     .status(403)
+      //     .json({ message: "Access denied. You do not have the required role." });
+      // }
   
       const pageNumber = parseInt(page);
       const limitNumber = parseInt(limit);
