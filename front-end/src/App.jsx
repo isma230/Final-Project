@@ -15,7 +15,6 @@ export default function App() {
   return (
     <>
       <Routes>
-        <Route path="/" element={<Navigate to="/front-store/login" />} />
         <Route path="/front-store/*" element={<Layout />} />
         <Route
           path="/back-office/*"
