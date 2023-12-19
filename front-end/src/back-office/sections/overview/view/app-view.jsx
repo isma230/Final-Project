@@ -28,7 +28,7 @@ export default function AppView() {
         <Grid xs={12} sm={6} md={3}>
           <AppWidgetSummary
             title="Weekly Sales"
-            total={714000}
+            total={14}
             color="success"
             icon={<img alt="icon" src="/assets/icons/glass/ic_glass_bag.png" />}
           />
@@ -37,7 +37,7 @@ export default function AppView() {
         <Grid xs={12} sm={6} md={3}>
           <AppWidgetSummary
             title="New Users"
-            total={1352831}
+            total={13}
             color="info"
             icon={
               <img alt="icon" src="/assets/icons/glass/ic_glass_users.png" />
@@ -48,7 +48,7 @@ export default function AppView() {
         <Grid xs={12} sm={6} md={3}>
           <AppWidgetSummary
             title="Item Orders"
-            total={1723315}
+            total={1}
             color="warning"
             icon={<img alt="icon" src="/assets/icons/glass/ic_glass_buy.png" />}
           />
@@ -57,7 +57,7 @@ export default function AppView() {
         <Grid xs={12} sm={6} md={3}>
           <AppWidgetSummary
             title="Bug Reports"
-            total={234}
+            total={10}
             color="error"
             icon={
               <img alt="icon" src="/assets/icons/glass/ic_glass_message.png" />
@@ -144,15 +144,15 @@ export default function AppView() {
 
         <Grid xs={12} md={6} lg={4}>
           <AppCurrentSubject
-            title="Current Subject"
+            title="Best Food"
             chart={{
               categories: [
-                "English",
-                "History",
-                "Physics",
-                "Geography",
-                "Chinese",
-                "Math",
+                "Burger",
+                "Pizza",
+                "Bread",
+                "Tacos",
+                "Sandwich",
+                "Jus",
               ],
               series: [
                 { name: "Series 1", data: [80, 50, 30, 40, 100, 20] },
@@ -163,7 +163,7 @@ export default function AppView() {
           />
         </Grid>
 
-        <Grid xs={12} md={6} lg={8}>
+        {/* <Grid xs={12} md={6} lg={8}>
           <AppNewsUpdate
             title="News Update"
             list={[...Array(5)].map((_, index) => ({
@@ -174,9 +174,9 @@ export default function AppView() {
               postedAt: faker.date.recent(),
             }))}
           />
-        </Grid>
+        </Grid> */}
 
-        <Grid xs={12} md={6} lg={4}>
+        {/* <Grid xs={12} md={6} lg={4}>
           <AppOrderTimeline
             title="Order Timeline"
             list={[...Array(5)].map((_, index) => ({
@@ -192,7 +192,7 @@ export default function AppView() {
               time: faker.date.past(),
             }))}
           />
-        </Grid>
+        </Grid> */}
 
         <Grid xs={12} md={6} lg={4}>
           <AppTrafficBySite
@@ -238,7 +238,7 @@ export default function AppView() {
           />
         </Grid>
 
-        <Grid xs={12} md={6} lg={8}>
+        {/* <Grid xs={12} md={6} lg={8}>
           <AppTasks
             title="Tasks"
             list={[
@@ -249,7 +249,7 @@ export default function AppView() {
               { id: "5", name: "Sprint Showcase" },
             ]}
           />
-        </Grid>
+        </Grid> */}
       </Grid>
     </Container>
   );

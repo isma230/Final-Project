@@ -13,9 +13,11 @@ import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
+import { useRouter } from "../../../routes/hooks";
 
 const AddUserPage = () => {
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const [formData, setFormData] = useState({
     first_name: "",
@@ -69,6 +71,9 @@ const AddUserPage = () => {
         icon: "success",
         confirmButtonText: "OK",
       });
+      setTimeout(() => {
+        router.push("/back-office/user");
+      }, 1500);
     },
     onError: (error, variables, context) => {
       // Handle error

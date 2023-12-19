@@ -15,18 +15,19 @@ const nav__links = [
     display: 'Foods',
     path: '/front-store/foods',
   },
-  {
-    display: 'Cart',
-    path: '/front-store/cart',
-  },
-  {
-    display: 'Contact',
-    path: '/front-store/contact',
-  },
+  // {
+  //   display: 'Cart',
+  //   path: '/front-store/cart',
+  // },
+  // {
+  //   display: 'Contact',
+  //   path: '/front-store/contact',
+  // },
 ];
 const Header = () => {
   const menuRef = useRef(null);
   const headerRef = useRef(null);
+  const isAuth = localStorage.getItem('customer');
   const totalQuantity = useSelector((state) => state.cart.totalQuantity);
   const dispatch = useDispatch();
   const toggleMenu = () => menuRef.current.classList.toggle('show__menu');
@@ -45,12 +46,13 @@ const Header = () => {
       }
     });
     return () => document.removeEventListener('scroll', headerRef);
-  }, []);
+  }, [isAuth]);
+
   return (
     <header className='header' ref={headerRef}>
       <Container>
         <div className='nav__wrapper d-flex align-items-center justify-content-between'>
-          <Link to='/home'>
+          <Link to='/front-store/home'>
             <div className='logo'>
               <img src={logo} alt='logo' />
               <h5>Foodie</h5>
@@ -81,9 +83,15 @@ const Header = () => {
             </span>
 
             <span className='user'>
-              <Link to='/login'>
-                <i className='ri-user-line' />
-              </Link>
+              {isAuth ? (
+                <Link to='/front-store/profile'>
+                  <i className='ri-user-line' />
+                </Link>
+              ) : (
+                <Link to='/front-store/login'>
+                  <i className='ri-user-line' />
+                </Link>
+              )}
             </span>
 
             <span className='mobile__menu' onClick={toggleMenu}>

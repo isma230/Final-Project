@@ -11,24 +11,23 @@ import TextField from "@mui/material/TextField";
 import Iconify from "../../../components/iconify";
 import MenuItem from "@mui/material/MenuItem";
 import { useParams } from "react-router-dom";
-import {useRouter} from "../../../routes/hooks";
+import { useRouter } from "../../../routes/hooks";
 
-const EditCategoryPage = () => {
-    const params = useParams();
-    const userId = params.id;
-    const router = useRouter();
-   const queryClient = useQueryClient();
+const EditOrderPage = () => {
+  const params = useParams();
+  const orderId = params.id;
+  const router = useRouter();
+  const queryClient = useQueryClient();
 
-   const [formData, setFormData] = useState({
-    category_name: "",
-    active: "",
-    activeOptions: ["true", "false"],
+  const [formData, setFormData] = useState({
+    status: "",
+    orderOptions: ['Open', 'Shipped', 'Paid', 'Closed', 'Canceled'],
   });
 
-  const { data: user, isLoading } = useQuery(["user", userId], async () => {
+  const { data: order, isLoading } = useQuery(["order", orderId], async () => {
     try {
       const response = await axios.get(
-        `http://localhost:5000/v1/categories/${userId}`,
+        `http://localhost:5000/v1/orders/${orderId}`,
         {
           withCredentials: true,
         }
@@ -40,31 +39,24 @@ const EditCategoryPage = () => {
   });
 
   useEffect(() => {
-    if (user) {
+    if (order) {
       setFormData({
-        category_name: user.category_name,
-        active: user.active,
-        activeOptions: ["true", "false"],
+        ...formData,
+        status: order.status,
       });
     }
-  }, [user]);
+  }, [order]);
 
-  const isFormValid = () => {
-    return (
-      formData.category_name.trim() !== "" &&
-      formData.active !== "" 
-    );
-  };
-  
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const updateUser = async (updatedUser) => {
+  const updateOrder = async (updatedOrder) => {
     try {
       const response = await axios.put(
-        `http://localhost:5000/v1/categories/${userId}`,
-        updatedUser,
+        `http://localhost:5000/v1/orders/${orderId}`,
+        updatedOrder,
         {
           withCredentials: true,
         }
@@ -75,16 +67,16 @@ const EditCategoryPage = () => {
     }
   };
 
-  const mutation = useMutation(updateUser, {
+  const mutation = useMutation(updateOrder, {
     onSuccess: (data, variables, context) => {
       Swal.fire({
         title: "Success!",
-        text: "Category updated successfully!",
+        text: "Order updated successfully!",
         icon: "success",
         confirmButtonText: "OK",
       });
       setTimeout(() => {
-        router.push("/back-office/category");
+        router.push("/back-office/orders");
       }, 1500);
     },
     onError: (error, variables, context) => {
@@ -96,7 +88,7 @@ const EditCategoryPage = () => {
       });
     },
     onSettled: (data, error, variables, context) => {
-      queryClient.invalidateQueries(["user", userId]);
+      queryClient.invalidateQueries(["order", orderId]);
     },
   });
 
@@ -117,43 +109,34 @@ const EditCategoryPage = () => {
         justifyContent="space-between"
         mb={5}
       >
-        <Typography variant="h4">Edit Categorie</Typography>
+        <Typography variant="h4">Edit Order</Typography>
       </Stack>
 
       <Card>
         <form onSubmit={handleSubmit}>
           <Stack spacing={3} p={5}>
             <TextField
-              label="Categorie Name"
+              label="Status"
               variant="outlined"
               fullWidth
-              name="categorie_name"
-              value={formData.category_name}
+              name="status"
+              value={formData.status}
               onChange={handleChange}
-            />
-            <TextField
-              label="Active Status"
-              variant="outlined"
-              fullWidth
-              name="active"
               select
-              value={formData.active}
-              onChange={handleChange}
             >
-                {formData.activeOptions.map((active) => (
-                    <MenuItem key={active} value={active}>
-                    {active}
-                    </MenuItem>
-                ))}
+              {formData.orderOptions.map((option) => (
+                <MenuItem key={option} value={option}>
+                  {option}
+                </MenuItem>
+              ))}
             </TextField>
             <Button
               type="submit"
               variant="contained"
               color="primary"
               startIcon={<Iconify icon="eva:save-fill" />}
-              disabled={!isFormValid() || mutation.isLoading}    
             >
-              {mutation.isLoading ? "Updating..." : "Update Category"}
+              {mutation.isLoading ? "Updating..." : "Update User"}
             </Button>
           </Stack>
         </form>
@@ -162,4 +145,4 @@ const EditCategoryPage = () => {
   );
 };
 
-export default EditCategoryPage;
+export default EditOrderPage;

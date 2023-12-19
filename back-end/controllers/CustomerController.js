@@ -33,6 +33,16 @@ exports.login = async (req, res, next, customer, info) => {
       process.env.JWT_SECRET_KEY
     );
     res.cookie("jwt", token, { httpOnly: true });
+    return res.json({
+      message: "Login successful",
+      token,
+      customer: {
+        firstname:customer.first_name,
+        lastname:customer.last_name,
+        email: customer.email,
+        valid_account: customer.valid_account,
+      },
+    });
 
     req.logIn(customer, (err) => {
       if (err) {

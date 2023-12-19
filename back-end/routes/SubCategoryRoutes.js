@@ -5,7 +5,7 @@ const isAuthenticated = require('../middleware/isAuthenticated');
 
 
 // GET route to list or search all categories (with pagination)
-router.post('/', isAuthenticated, SubCategoryController.createSubcategory);
+router.post('/create', isAuthenticated, SubCategoryController.createSubcategory);
 
 // GET route to list or search all categories (with pagination)
 router.get('/', isAuthenticated, SubCategoryController.listOrSearchSubcategories);

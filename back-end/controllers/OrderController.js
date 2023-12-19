@@ -76,7 +76,7 @@ exports.listOrders = async (req, res) => {
       { $sort: { order_date: -1 } },
     ]);
 
-    res.json({ data: orders });
+    res.json({ orders });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal server error', error });
@@ -146,18 +146,13 @@ exports.updateOrderStatus = async (req, res) => {
 
     const orderId = req.params.id;
     const newStatus = req.body.status;
-    const newOrderItems = req.body.order_items;
-    const newCartTotalPrice = req.body.cart_total_price;
 
     const order = await Order.findById(orderId);
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
-    order.order_items = newOrderItems;
-    order.cart_total_price = newCartTotalPrice;
     order.status = newStatus;
-    order.order_date = Date.now();
     await order.save();
 
     res.status(200).json({ message: "Order status updated successfully" });

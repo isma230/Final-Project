@@ -30,7 +30,9 @@ const navConfig = [
     title: "Category",
     path: "/back-office/category",
     icon: icon("ic_category"),
-    subitems: [{ title: "Add New Category", path: "/back-office/category/addcategory" }],
+    subitems: [
+      { title: "Add New Category", path: "/back-office/category/addcategory" },
+    ],
   },
   {
     title: "SubCategory",
@@ -46,7 +48,6 @@ const navConfig = [
     icon: icon("ic_product"),
     subitems: [
       { title: "Add New Product", path: "/back-office/products/addproduct" },
-      { title: "Edit Product", path: "/back-office/products/editproduct" },
     ],
   },
   {

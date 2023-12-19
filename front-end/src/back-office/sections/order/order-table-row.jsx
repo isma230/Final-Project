@@ -21,15 +21,12 @@ import Iconify from "../../components/iconify";
 export default function UserTableRow({
   id,
   selected: externalSelected,
-  name,
-  firstname,
-  lastname,
-  email,
-  role,
-  active,
-  lastUpdate,
-  lastLogin,
-  creationDate,
+  orderDate,
+  customerFirstName,
+  customerLastName,
+  itemsTotal,
+  totalPrice,
+  status,
   handleClick,
 }) {
   const [internalSelected, setInternalSelected] = useState(false);
@@ -39,6 +36,19 @@ export default function UserTableRow({
     setInternalSelected(externalSelected);
   }, [externalSelected]);
   const [open, setOpen] = useState(null);
+  let color;
+
+  if (status === "Open") {
+    color = "primary";
+  } else if (status === "Shipped") {
+    color = "info";
+  } else if (status === "Paid") {
+    color = "success";
+  } else if (status === "Closed") {
+    color = "warning";
+  } else if (status === "Canceled") {
+    color = "error";
+  }
 
   return (
     <>
@@ -62,27 +72,26 @@ export default function UserTableRow({
             onClick={(event) => event.stopPropagation()} // Stop propagation for checkbox clicks
           />
         </TableCell>
-        <TableCell  >
+        <TableCell >
           <Stack >
             <Typography variant="subtitle2" noWrap>
-              {name}
+              {customerFirstName}
             </Typography>
           </Stack>
         </TableCell>
-        <TableCell>{firstname}</TableCell>
-        <TableCell>{lastname}</TableCell>
-        <TableCell>{email}</TableCell>
-        <TableCell>{role}</TableCell>
-        <TableCell align="left" >
-          {active ? (
-            <Chip label="Active" color="success" />
-          ) : (
-            <Chip label="Inactive" color="error" />
-          )}
+        <TableCell >
+          <Stack >
+            <Typography variant="subtitle2" noWrap>
+              {customerLastName}
+            </Typography>
+          </Stack>
         </TableCell>
-        <TableCell>{lastUpdate}</TableCell>
-        <TableCell>{lastLogin}</TableCell>
-        <TableCell>{creationDate}</TableCell>
+        <TableCell >
+        <Chip label={status} color={color} />
+        </TableCell>
+        <TableCell>{itemsTotal}</TableCell>
+        <TableCell>{totalPrice}</TableCell>
+        <TableCell>{orderDate}</TableCell>
       </TableRow>
     </>
   );
@@ -90,15 +99,10 @@ export default function UserTableRow({
 
 UserTableRow.propTypes = {
   id: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
-  firstname: PropTypes.string.isRequired,
-  lastname: PropTypes.string.isRequired,
-  email: PropTypes.string.isRequired,
-  role: PropTypes.string.isRequired,
-  active: PropTypes.bool.isRequired,
-  lastUpdate: PropTypes.string.isRequired,
-  lastLogin: PropTypes.string.isRequired,
-  creationDate: PropTypes.string.isRequired,
+  orderDate: PropTypes.string.isRequired,
+  customer: PropTypes.string.isRequired,
+  totalPrice: PropTypes.number.isRequired,
+  status: PropTypes.bool.isRequired,
   selected: PropTypes.bool.isRequired,
   handleClick: PropTypes.func.isRequired,
 };

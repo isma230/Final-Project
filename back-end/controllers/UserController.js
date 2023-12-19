@@ -21,11 +21,8 @@ exports.login = async (req, res, next, user, info) => {
     // Save the user with the updated last login date
     await user.save();
 
-    // Generate a JWT token
-    const token = jwt.sign(
-      { sub: user._id, role: user.role },
-      process.env.JWT_SECRET_KEY
-    );
+     // Generate a JWT token
+    const token = jwt.sign({ sub: user._id , role: user.role }, process.env.JWT_SECRET_KEY);
     // Log in the user
     req.logIn(user, (err) => {
       if (err) {
@@ -45,7 +42,7 @@ exports.login = async (req, res, next, user, info) => {
     });
   } catch (err) {
     return next(err);
-  }
+  } 
 };
 
 // Create User (accessible only to Admin users)
@@ -246,7 +243,7 @@ exports.updateUserById = async (req, res) => {
 
     // Check if the user email is unique
     const existingUserWithEmail = await User.findOne({
-      email,
+      email,  
       _id: { $ne: id },
     });
     if (existingUserWithEmail) {

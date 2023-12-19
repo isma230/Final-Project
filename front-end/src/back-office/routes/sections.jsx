@@ -22,6 +22,10 @@ export const AddCategoryPage = lazy(() => import("../pages/addCategory"));
 export const SubCategoryPage = lazy(() => import("../pages/subcategory"));
 export const AddSubCategoryPage = lazy(() => import("../pages/addSubCategory"));
 export const EditSubCategoryPage = lazy(() => import("../pages/editSubCategory"));
+export const AddProductPage = lazy(() => import('../pages/addProduct'));
+export const EditProductPage = lazy(() => import('../pages/editProduct'));
+export const OrderPage = lazy(() => import('../pages/orders'));
+export const EditOrderPage = lazy(() => import('../pages/editOrder')); 
 // ----------------------------------------------------------------------
 // Higher Order Component for Protected Routes
 const ProtectedRoute = ({ children }) => {
@@ -30,7 +34,7 @@ const ProtectedRoute = ({ children }) => {
 
   useEffect(() => {
     if (!user) {
-      router.push("/login");
+      router.push("/back-office/login");
     }
   }, [user]);
 
@@ -59,12 +63,20 @@ export default function Router() {
           element: <AddUserPage />,
         },
         {
-          path: "products",
+          path: 'user/edituser',
+          element: <EditUserPage />,
+        },       
+        {
+          path: 'products',
           element: <ProductsPage />,
-          children: [
-            { path: "addproduct", element: <ProductsPage /> },
-            { path: "editproduct", element: <ProductsPage /> },
-          ],
+        },
+        {
+          path: 'products/addproduct',
+          element: <AddProductPage />,
+        },
+        {
+          path: 'products/editproduct/:id',
+          element: <EditProductPage />,
         },
         {
           path: "customer",
@@ -92,7 +104,7 @@ export default function Router() {
         },
         {
           path: "orders",
-          element: <BlogPage />,
+          element: <OrderPage />,
         },
       ],
     },
@@ -111,6 +123,10 @@ export default function Router() {
     {
       path: "subcategory/editsubcategory/:id",
       element: <EditSubCategoryPage />,
+    },
+    {
+      path: "orders/editorder/:id",
+      element: <EditOrderPage />,
     },
     {
       path: "payment",

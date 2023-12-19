@@ -5,6 +5,7 @@ import { Container, Row, Col } from 'reactstrap';
 import CommonSection from '../components/UI/common-section/CommonSection';
 import Helmet from '../components/Helmet/Helmet';
 import '../styles/checkout.css';
+import Header from '../components/Header/Header';
 const Checkout = () => {
   const [enteredName, setEnteredName] = useState('');
   const [enteredEmail, setEnteredEmail] = useState('');
@@ -35,6 +36,7 @@ const Checkout = () => {
   };
   return (
     <Helmet title='Checkout'>
+      <Header/>
       <CommonSection title='Checkout' />
       <section>
         <Container>

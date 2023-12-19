@@ -37,11 +37,11 @@ const Footer = () => {
             <h5 className='footer__title'>Contact</h5>
             <ListGroup className='delivery__time-list'>
               <ListGroupItem className='delivery__time-item border-0 ps-0'>
-                <span>Location: 123 Olympiakatu, Espoo, FI</span>
+                <span>Location: Casablanca</span>
               </ListGroupItem>
 
               <ListGroupItem className='delivery__time-item border-0 ps-0'>
-                <span>Hotline: +358 412 345 023</span>
+                <span>Phone: +212841234502</span>
               </ListGroupItem>
 
               <ListGroupItem className='delivery__time-item border-0 ps-0'>
@@ -62,10 +62,6 @@ const Footer = () => {
         </Row>
         <Row className='mt-5'>
           <Col lg='6' md='6'>
-            <p className='copyright__text'>
-              Copyright - 2022, made by Tram Nguyen, under guidance from Muhibur
-              Rahman
-            </p>
           </Col>
           <Col lg='6' md='6'>
             <div className='social__links d-flex align-items-center gap-4 justify-content-end'>

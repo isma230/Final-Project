@@ -16,7 +16,7 @@ const categoryData = [
     imgUrl: categoryImg02,
   },
   {
-    display: 'Asian food',
+    display: 'Food',
     imgUrl: categoryImg03,
   },
   {

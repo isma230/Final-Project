@@ -16,7 +16,9 @@ require('dotenv').config();
 
 
 // Initialize Express 
-const app = express();
+const app = express(); // Déplacez cette ligne ici
+app.use(express.static('public'));
+
 const db = require('./config/database');
 const passportSetup = require('./config/passport');
 
@@ -28,7 +30,19 @@ app.use(session({
   secret: process.env.SESSION_SECRET_KEY, // Change this to a strong, random secret
   resave: false,
   saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'None', // Permet le partage avec des sites tiersiers
+  }
 }));
+
+app.use(cors({
+  origin: 'http://localhost:5173', // your frontend's address
+  // methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+})); // Utilisez le middleware CORS après l'initialisation de l'application
+
 
 // Initialize Passport
 app.use(passport.initialize());
@@ -83,7 +97,9 @@ app.get('/stripe-transactions', async (req, res) => {
 
 
 const port = process.env.PORT;
+// Start the server
+ 
 
 app.listen(port, () => {
-    console.log(`Listening on port ${port}...`);
-    }); 
+  console.log(`Server running on port ${port}`);
+});

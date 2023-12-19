@@ -41,7 +41,7 @@ const AddSubCategoryPage = () => {
   const addSubCategorie = async (newCategorie) => {
     try {
       const response = await axios.post(
-        "http://localhost:5000/v1/subcategories",
+        "http://localhost:5000/v1/subcategories/create",
         newCategorie,
         {
           withCredentials: true,
@@ -65,7 +65,7 @@ const AddSubCategoryPage = () => {
         confirmButtonText: "OK",
       });
       setTimeout(() => {
-        router.push("/subcategory");
+        router.push("/back-office/subcategory");
       }, 1500);
     },
     onError: (error, variables, context) => {

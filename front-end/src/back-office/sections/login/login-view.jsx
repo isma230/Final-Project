@@ -59,7 +59,7 @@ export default function LoginView() {
 
       setTimeout(() => {
         // Navigate to the dashboard
-        router.push("/");
+        router.push("/back-office");
       }, 1500);
     } catch (error) {
       toast.error(error.response.data.message);

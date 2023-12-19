@@ -100,7 +100,7 @@ const EditUserPage = () => {
         confirmButtonText: "OK",
       });
       setTimeout(() => {
-        router.push("/user");
+        router.push("/back-office/user");
       }, 1500);
     },
     onError: (error, variables, context) => {

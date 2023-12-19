@@ -1,20 +1,18 @@
 import PropTypes from 'prop-types';
-
 import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-
+import Button from '@mui/material/Button';
 import { fCurrency } from '../../utils/format-number';
-
+import { Link } from 'react-router-dom';
 import Label from '../../components/label';
 import { ColorPreview } from '../../components/color-utils';
-
-// ----------------------------------------------------------------------
+import axios from 'axios';
+import { useQueryClient } from 'react-query'; 
 
 export default function ShopProductCard({ product }) {
-  const renderStatus = (
+  const renderStatus = product.status && (
     <Label
       variant="filled"
       color={(product.status === 'sale' && 'error') || 'info'}
@@ -30,34 +28,37 @@ export default function ShopProductCard({ product }) {
     </Label>
   );
 
-  const renderImg = (
+  const renderImg = product.product_image && (
     <Box
       component="img"
       alt={product.name}
-      src={product.cover}
+      src={"http://localhost:5000/uploads/" + product.product_image.split("\\").at(-1)}
       sx={{
         top: 0,
         width: 1,
         height: 1,
-        objectFit: 'cover',
+        objectFit: 'contain',
         position: 'absolute',
       }}
     />
   );
+  const queryClient = useQueryClient();
+  const handleDelete = async (_id) => {
+    try {
+      await axios.delete(`http://localhost:5000/v1/products/${_id}`, {
+        withCredentials: true,
+        // Ajouter d'autres headers au besoin (par exemple, le token d'authentification)
+      });
+  
+      // Invalider et refaire la requête pour obtenir la liste des produits
+      queryClient.invalidateQueries('products');
+    } catch (error) {
+      console.error('Erreur lors de la suppression du produit :', error);
+    }
+  };
 
   const renderPrice = (
     <Typography variant="subtitle1">
-      <Typography
-        component="span"
-        variant="body1"
-        sx={{
-          color: 'text.disabled',
-          textDecoration: 'line-through',
-        }}
-      >
-        {product.priceSale && fCurrency(product.priceSale)}
-      </Typography>
-      &nbsp;
       {fCurrency(product.price)}
     </Typography>
   );
@@ -65,19 +66,35 @@ export default function ShopProductCard({ product }) {
   return (
     <Card>
       <Box sx={{ pt: '100%', position: 'relative' }}>
-        {product.status && renderStatus}
-
+        {renderStatus}
         {renderImg}
       </Box>
 
       <Stack spacing={2} sx={{ p: 3 }}>
-        <Link color="inherit" underline="hover" variant="subtitle2" noWrap>
-          {product.name}
-        </Link>
+        <Typography color="inherit" underline="hover" variant="subtitle2" noWrap>
+          {product.product_name}
+        </Typography>
 
         <Stack direction="row" alignItems="center" justifyContent="space-between">
-          <ColorPreview colors={product.colors} />
+          {product.colors && <ColorPreview colors={product.colors} />}
           {renderPrice}
+        </Stack>
+
+
+        <Typography variant="body2">{product.short_description}</Typography>
+
+        <Typography variant="body2">{product.long_description}</Typography>
+
+        {/* Boutons d'ajout et de suppression */}
+        <Stack direction="row" spacing={2}>
+          <Link to={`/back-office/products/editproduct/${product._id}`}>
+            <Button variant="contained" color="primary">
+              Edit
+            </Button>
+          </Link>
+          <Button variant="contained" color="error" onClick={() => handleDelete(product._id)}>
+            Delete
+          </Button>
         </Stack>
       </Stack>
     </Card>
@@ -85,5 +102,15 @@ export default function ShopProductCard({ product }) {
 }
 
 ShopProductCard.propTypes = {
-  product: PropTypes.object,
+  product: PropTypes.shape({
+    status: PropTypes.string,
+    product_image: PropTypes.string,
+    name: PropTypes.string,
+    price: PropTypes.number,
+    discount_price: PropTypes.number,
+    colors: PropTypes.arrayOf(PropTypes.string),
+    short_description: PropTypes.string,
+    long_description: PropTypes.string,
+    // Ajoutez d'autres propriétés du produit ici
+  }),
 };

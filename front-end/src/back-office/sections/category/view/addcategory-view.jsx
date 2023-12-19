@@ -35,7 +35,7 @@ const AddCategoryPage = () => {
   const addCategorie = async (newCategorie) => {
     try {
       const response = await axios.post(
-        "http://localhost:5000/v1/categories",
+        "http://localhost:5000/v1/categories/create",
         newCategorie,
         {
           withCredentials: true,
@@ -58,6 +58,9 @@ const AddCategoryPage = () => {
         icon: "success",
         confirmButtonText: "OK",
       });
+      setTimeout(() => {
+        router.push("/back-office/category");
+      }, 1500);
     },
     onError: (error, variables, context) => {
       // Handle error

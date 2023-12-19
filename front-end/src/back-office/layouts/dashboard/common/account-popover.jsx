@@ -52,7 +52,7 @@ export default function AccountPopover() {
         }
       );
       localStorage.removeItem("user");
-      router.push("/login");
+      router.push("/back-office/login");
     } catch (error) {
       console.log(error);
     }

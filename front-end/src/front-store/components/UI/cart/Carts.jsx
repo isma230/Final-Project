@@ -35,7 +35,7 @@ const Carts = () => {
             Subtotal: <span>${totalAmount}</span>
           </h6>
           <button>
-            <Link to='/checkout'>Checkout</Link>
+            <Link to='/front-store/checkout'>Checkout</Link>
           </button>
         </div>
       </ListGroup>

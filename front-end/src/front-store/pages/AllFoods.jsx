@@ -7,6 +7,7 @@ import ProductCard from '../components/UI/product-card/ProductCard';
 import '../styles/all-foods.css';
 import ReactPaginate from 'react-paginate';
 import '../styles/pagination.css';
+import Header from '../components/Header/Header';
 
 const AllFoods = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -32,6 +33,7 @@ const AllFoods = () => {
   };
   return (
     <Helmet title='All Foods'>
+          <Header/>
       <CommonSection title='All Foods' />
       <section>
         <Container>

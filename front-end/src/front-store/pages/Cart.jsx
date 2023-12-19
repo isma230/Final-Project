@@ -6,11 +6,13 @@ import '../styles/cart-page.css';
 import { Link } from 'react-router-dom';
 import { Container, Col, Row } from 'reactstrap';
 import { cartActions } from '../store/shopping-cart/cartSlice';
+import Header from '../components/Header/Header';
 const Cart = () => {
   const cartItems = useSelector((state) => state.cart.cartItems);
   const totalAmount = useSelector((state) => state.cart.totalAmount);
   return (
     <Helmet title='Cart'>
+      <Header/>
       <CommonSection title='Your cart' />
       <section>
         <Container>

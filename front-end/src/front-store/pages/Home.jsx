@@ -1,160 +1,150 @@
-import React, { useState, useEffect } from 'react';
-import Helmet from '../components/Helmet/Helmet.jsx';
-import { Container, Row, Col, ListGroup, ListGroupItem } from 'reactstrap';
-import heroImg from '../assets/images/hero.png';
-import '../styles/hero-section.css';
-import { Link } from 'react-router-dom';
-import Category from '../components/UI/category/Category.jsx';
-import '../styles/home.css';
-import featureImg01 from '../assets/images/service-01.png';
-import featureImg02 from '../assets/images/service-02.png';
-import featureImg03 from '../assets/images/service-03.png';
-import products from '../assets/fake-data/products.js';
-import foodCategoryImg01 from '../assets/images/hamburger.png';
-import foodCategoryImg02 from '../assets/images/pizza.png';
-import foodCategoryImg03 from '../assets/images/bread.png';
-import ProductCard from '../components/UI/product-card/ProductCard.jsx';
-import whyImg from '../assets/images/location.png';
-import networkImg from '../assets/images/network.png';
-import TestimonialSlider from '../components/UI/slider/TestimonialSlider.jsx';
+import React, { useState, useEffect } from "react";
+import Helmet from "../components/Helmet/Helmet.jsx";
+import { Container, Row, Col, ListGroup, ListGroupItem } from "reactstrap";
+import heroImg from "../assets/images/hero.png";
+import "../styles/hero-section.css";
+import Header from "../components/Header/Header.jsx";
+import { Link } from "react-router-dom";
+import Category from "../components/UI/category/Category.jsx";
+import "../styles/home.css";
+import featureImg01 from "../assets/images/service-01.png";
+import featureImg02 from "../assets/images/service-02.png";
+import featureImg03 from "../assets/images/service-03.png";
+import products from "../assets/fake-data/products.js";
+import foodCategoryImg01 from "../assets/images/hamburger.png";
+import foodCategoryImg02 from "../assets/images/pizza.png";
+import foodCategoryImg03 from "../assets/images/bread.png";
+import ProductCard from "../components/UI/product-card/ProductCard.jsx";
+import whyImg from "../assets/images/location.png";
+import networkImg from "../assets/images/network.png";
+import TestimonialSlider from "../components/UI/slider/TestimonialSlider.jsx";
 
 const featureData = [
   {
-    title: 'Quick Delivery',
+    title: "Quick Delivery",
     imgUrl: featureImg01,
-    desc: 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Culpa, esse.',
+    desc: "Experience the speed of excellence with our quick delivery service. We understand that time is of the essence.",
   },
   {
-    title: 'Super Dine In',
+    title: "Super Dine In",
     imgUrl: featureImg02,
-    desc: 'Lorem, ipsum dolor sit amet consectetur adipisicing elit. Architecto, sapiente?',
+    desc: "Immerse yourself in a dining experience like no other with our super dine-in service.",
   },
   {
-    title: 'Easy Pick Up',
+    title: "Easy Pick Up",
     imgUrl: featureImg03,
-    desc: 'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Tempora, saepe!',
+    desc: "Streamline your dining routine with our easy pick-up service. Simply place your order.",
   },
 ];
 const Home = () => {
-  const [category, setCategory] = useState('ALL');
+  const [category, setCategory] = useState("ALL");
   const [allProducts, setAllProducts] = useState(products);
   const [hotPizza, setHotPizza] = useState([]);
 
   useEffect(() => {
-    const filteredPizza = products.filter((item) => item.category === 'Pizza');
+    const filteredPizza = products.filter((item) => item.category === "Pizza");
     const slicePizza = filteredPizza.slice(0, 4);
     setHotPizza(slicePizza);
   }, []);
   useEffect(() => {
-    if (category === 'ALL') {
+    if (category === "ALL") {
       setAllProducts(products);
     }
-    if (category === 'BURGER') {
+    if (category === "BURGER") {
       const filteredProducts = products.filter(
-        (item) => item.category === 'Burger'
+        (item) => item.category === "Burger"
       );
       setAllProducts(filteredProducts);
     }
-    if (category === 'PIZZA') {
+    if (category === "PIZZA") {
       const filteredProducts = products.filter(
-        (item) => item.category === 'Pizza'
+        (item) => item.category === "Pizza"
       );
       setAllProducts(filteredProducts);
     }
-    if (category === 'BREAD') {
+    if (category === "BREAD") {
       const filteredProducts = products.filter(
-        (item) => item.category === 'Bread'
+        (item) => item.category === "Bread"
       );
       setAllProducts(filteredProducts);
     }
   }, [category]);
   return (
-    <Helmet title='Home'>
+    <Helmet title="Home">
+      <Header/>
       <section>
         <Container>
           <Row>
-            <Col lg='6' md='6'>
-              <div className='hero__content'>
-                <h5 className='mb-3'>
+            <Col lg="6" md="6">
+              <div className="hero__content">
+                <h5 className="mb-3">
                   Fast and easy food delivery service to spoil the foodie within
                   you
                 </h5>
-                <h1 className='mb-4 hero__title'>
+                <h1 className="mb-4 hero__title">
                   <span>HUNGRY?</span> just wait <br /> food at
                   <span> your door!</span>
                 </h1>
-
-                <p>
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                  Placeat, minima.
-                </p>
-
-                <div className='hero__btns d-flex align-items-center gap-5 mt-4'>
-                  <button className='order__btn d-flex align-items-center justify-content-between'>
-                    Order now <i className='ri-arrow-right-s-line'></i>
-                  </button>
-
-                  <button className='all__foods-btn'>
-                    <Link to='/foods'>See all foods</Link>
+                <div className="hero__btns d-flex align-items-center gap-5 mt-4">
+                  <Link to="/front-store/foods">
+                    {" "}
+                    <button className="order__btn d-flex align-items-center justify-content-between">
+                      Order now <i className="ri-arrow-right-s-line"></i>
+                    </button>
+                  </Link>
+                  <button className="all__foods-btn">
+                    <Link to="/front-store/foods">See all foods</Link>
                   </button>
                 </div>
-                <div className='hero__service d-flex align-items-center gap-5 mt-5'>
-                  <p className='d-flex align-items-center gap-2'>
-                    <span className='shipping__icon'>
-                      <i className='ri-car-line'></i>
+                <div className="hero__service d-flex align-items-center gap-5 mt-5">
+                  <p className="d-flex align-items-center gap-2">
+                    <span className="shipping__icon">
+                      <i className="ri-car-line"></i>
                     </span>
                     Free Delivery
                   </p>
-                  <p className='d-flex align-items-center gap-2'>
-                    <span className='shipping__icon'>
-                      <i className='ri-shield-check-line'></i>
+                  <p className="d-flex align-items-center gap-2">
+                    <span className="shipping__icon">
+                      <i className="ri-shield-check-line"></i>
                     </span>
                     100% secure checkout
                   </p>
                 </div>
               </div>
             </Col>
-            <Col lg='6' md='6'>
-              <div className='hero__img'>
-                <img src={heroImg} alt='hero-img' className='w-100' />
+            <Col lg="6" md="6">
+              <div className="hero__img">
+                <img src={heroImg} alt="hero-img" className="w-100" />
               </div>
             </Col>
           </Row>
         </Container>
       </section>
-      <section className='pt-0'>
+      <section className="pt-0">
         <Category />
       </section>
 
       <section>
         <Container>
           <Row>
-            <Col lg='12' className='text-center'>
-              <h5 className='feature__subtitle mb-4'>What we serve</h5>
-              <h2 className='feature__title'> Just sit back at home</h2>
-              <h2 className='feature__title'>
+            <Col lg="12" className="text-center">
+              <h5 className="feature__subtitle mb-4">What we serve</h5>
+              <h2 className="feature__title"> Just sit back at home</h2>
+              <h2 className="feature__title">
                 we will <span>take care</span>
               </h2>
-              <p className='mb-1 mt-4 feature__text'>
-                Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-                Laborum, deserunt.
-              </p>
-              <p className='mb-1 mt-4 feature__text'>
-                Lorem ipsum dolor sit, amet consectetur adipisicing elit. Error,
-                ullam?
-              </p>
             </Col>
 
             {featureData.map((item, index) => {
               return (
-                <Col lg='4' md='6' sm='6' key={index} className='mt-5'>
-                  <div className='feature__item text-center px-5 py-3'>
+                <Col lg="4" md="6" sm="6" key={index} className="mt-5">
+                  <div className="feature__item text-center px-5 py-3">
                     <img
-                      className='w-25 mb-3'
+                      className="w-25 mb-3"
                       src={item.imgUrl}
-                      alt='feature-img'
+                      alt="feature-img"
                     />
-                    <h5 className='fw-bold mb-3'>{item.title}</h5>
+                    <h5 className="fw-bold mb-3">{item.title}</h5>
                     <p>{item.desc}</p>
                   </div>
                 </Col>
@@ -167,44 +157,44 @@ const Home = () => {
       <section>
         <Container>
           <Row>
-            <Col lg='12' className='text-center'>
+            <Col lg="12" className="text-center">
               <h2>Popular Foods</h2>
             </Col>
-            <Col lg='12'>
-              <div className='food__category d-flex align-items-center justify-content-center gap-5'>
+            <Col lg="12">
+              <div className="food__category d-flex align-items-center justify-content-center gap-5">
                 <button
-                  onClick={() => setCategory('ALL')}
+                  onClick={() => setCategory("ALL")}
                   className={`all__btn ${
-                    category === 'ALL' ? 'foodBtnActive' : ''
+                    category === "ALL" ? "foodBtnActive" : ""
                   }`}
                 >
                   All
                 </button>
                 <button
-                  onClick={() => setCategory('BURGER')}
+                  onClick={() => setCategory("BURGER")}
                   className={`d-flex align-items-center gap-2 ${
-                    category === 'BURGER' ? 'foodBtnActive' : ''
+                    category === "BURGER" ? "foodBtnActive" : ""
                   }`}
                 >
-                  <img src={foodCategoryImg01} alt='' />
+                  <img src={foodCategoryImg01} alt="" />
                   Burger
                 </button>
                 <button
-                  onClick={() => setCategory('PIZZA')}
+                  onClick={() => setCategory("PIZZA")}
                   className={`d-flex align-items-center gap-2 ${
-                    category === 'PIZZA' ? 'foodBtnActive' : ''
+                    category === "PIZZA" ? "foodBtnActive" : ""
                   }`}
                 >
-                  <img src={foodCategoryImg02} alt='' />
+                  <img src={foodCategoryImg02} alt="" />
                   Pizza
                 </button>
                 <button
-                  onClick={() => setCategory('BREAD')}
+                  onClick={() => setCategory("BREAD")}
                   className={`d-flex align-items-center gap-2 ${
-                    category === 'BREAD' ? 'foodBtnActive' : ''
+                    category === "BREAD" ? "foodBtnActive" : ""
                   }`}
                 >
-                  <img src={foodCategoryImg03} alt='' />
+                  <img src={foodCategoryImg03} alt="" />
                   Bread
                 </button>
               </div>
@@ -212,7 +202,7 @@ const Home = () => {
 
             {allProducts.map((item) => {
               return (
-                <Col lg='3' md='4' sm='6' xs='6' key={item.id} className='mt-5'>
+                <Col lg="3" md="4" sm="6" xs="6" key={item.id} className="mt-5">
                   <ProductCard item={item} />
                 </Col>
               );
@@ -221,51 +211,49 @@ const Home = () => {
         </Container>
       </section>
 
-      <section className='why__choose-us'>
+      <section className="why__choose-us">
         <Container>
           <Row>
-            <Col lg='6' md='6'>
-              <img src={whyImg} alt='why-foodie' className='w-100'></img>
+            <Col lg="6" md="6">
+              <img src={whyImg} alt="why-foodie" className="w-100"></img>
             </Col>
-            <Col lg='6' md='6'>
-              <div className='why__foodie'>
-                <h2 className='foodie-title mb-4'>
+            <Col lg="6" md="6">
+              <div className="why__foodie">
+                <h2 className="foodie-title mb-4">
                   Why <span>Foodie?</span>
                 </h2>
-                <p className='foodie-desc'>
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quis
-                  laborum ratione maiores? Commodi quam nostrum recusandae! Quod
-                  ducimus non molestias, numquam labore quidem nam illum esse
-                  harum vitae laborum? Error!
+                <p className="foodie-desc">
+                  At Foodie, we're not just a delivery service – we're your
+                  culinary companion on a gastronomic journey. We understand the
+                  language of flavors and the art of satisfaction, and that's
+                  why we stand out. Why Foodie? Because we believe in curating
+                  more than just meals; we curate experiences.
                 </p>
-                <ListGroup className='mt-4'>
-                  <ListGroupItem className='border-0 ps-0'>
-                    <p className='choose__us-title d-flex align-items-center gap-2'>
-                      <i className='ri-checkbox-circle-line'></i>Fresh and Tasty
+                <ListGroup className="mt-4">
+                  <ListGroupItem className="border-0 ps-0">
+                    <p className="choose__us-title d-flex align-items-center gap-2">
+                      <i className="ri-checkbox-circle-line"></i>Fresh and Tasty
                       food
                     </p>
-                    <p className='choose__us-desc'>
-                      Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                      Consectetur, sunt!
+                    <p className="choose__us-desc">
+                    Indulge in a world of flavor with our commitment to fresh and tasty food
                     </p>
                   </ListGroupItem>
-                  <ListGroupItem className='border-0 ps-0'>
-                    <p className='choose__us-title d-flex align-items-center gap-2'>
-                      <i className='ri-checkbox-circle-line'></i>Quality support
+                  <ListGroupItem className="border-0 ps-0">
+                    <p className="choose__us-title d-flex align-items-center gap-2">
+                      <i className="ri-checkbox-circle-line"></i>Quality support
                     </p>
-                    <p className='choose__us-desc'>
-                      Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                      Quae, iure.
+                    <p className="choose__us-desc">
+                    Experience unparalleled service with our commitment to quality support.
                     </p>
                   </ListGroupItem>
-                  <ListGroupItem className='border-0 ps-0'>
-                    <p className='choose__us-title d-flex align-items-center gap-2'>
-                      <i className='ri-checkbox-circle-line'></i>Order from any
+                  <ListGroupItem className="border-0 ps-0">
+                    <p className="choose__us-title d-flex align-items-center gap-2">
+                      <i className="ri-checkbox-circle-line"></i>Order from any
                       location
                     </p>
-                    <p className='choose__us-desc'>
-                      Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                      Temporibus, ex.
+                    <p className="choose__us-desc">
+                    Unlock the freedom to order from any location with Foodie.
                     </p>
                   </ListGroupItem>
                 </ListGroup>
@@ -275,15 +263,15 @@ const Home = () => {
         </Container>
       </section>
 
-      <section className='pt-0'>
+      <section className="pt-0">
         <Container>
           <Row>
-            <Col lg='12' className='text-center mb-5'>
+            <Col lg="12" className="text-center mb-5">
               <h2>Hot Pizza</h2>
             </Col>
 
             {hotPizza.map((item) => (
-              <Col lg='3' md='4' key={item.id}>
+              <Col lg="3" md="4" key={item.id}>
                 <ProductCard item={item} />
               </Col>
             ))}
@@ -294,22 +282,20 @@ const Home = () => {
       <section>
         <Container>
           <Row>
-            <Col lg='6' md='6'>
-              <div className='testimonial'>
-                <h5 className='testimonial__subtitle mb-4'>Testimonial</h5>
-                <h2 className='testimonial__title mb-40'>
+            <Col lg="6" md="6">
+              <div className="testimonial">
+                <h5 className="testimonial__subtitle mb-4">Testimonial</h5>
+                <h2 className="testimonial__title mb-40">
                   What our <span>customers </span>are saying
                 </h2>
-                <p className='testimonial__desc'>
-                  Lorem ipsum dolor sit amet consectetur, adipisicing elit.
-                  Dolor accusantium magni omnis culpa cupiditate nesciunt amet,
-                  fugit nam doloremque rem.
+                <p className="testimonial__desc">
+                Discover what our valued customers are saying about their experiences with Foodie.
                 </p>
                 <TestimonialSlider />
               </div>
             </Col>
-            <Col lg='6' md='6'>
-              <img src={networkImg} alt='testimonial-img' className='w-100' />
+            <Col lg="6" md="6">
+              <img src={networkImg} alt="testimonial-img" className="w-100" />
             </Col>
           </Row>
         </Container>

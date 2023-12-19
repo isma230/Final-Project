@@ -8,6 +8,7 @@ import { useDispatch } from 'react-redux';
 import { cartActions } from '../store/shopping-cart/cartSlice';
 import ProductCard from '../components/UI/product-card/ProductCard';
 import '../styles/product-details.css';
+import Header from '../components/Header/Header';
 const FoodDetails = () => {
   const [tab, setTab] = useState('desc');
   const [enteredName, setEnteredName] = useState('');
@@ -44,6 +45,7 @@ const FoodDetails = () => {
   }, [product]);
   return (
     <Helmet title='Food Details'>
+      <Header/>
       <CommonSection title={title} />
       <section>
         <Container>

@@ -84,7 +84,7 @@ const EditSubCategoryPage = () => {
         confirmButtonText: "OK",
       });
       setTimeout(() => {
-        router.push("/subcategory");
+        router.push("/back-office/subcategory");
       }, 1500);
     },
     onError: (error, variables, context) => {

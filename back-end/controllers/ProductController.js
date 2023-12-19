@@ -4,10 +4,13 @@ const Category = require("../models/CategoryModel");
 const mongoose = require("mongoose");
 const fs = require("fs");
 const path = require("path");
+
+
 // Function to create a new product
 exports.createProduct = async (req, res) => {
   try {
     const userRole = req.user.role;
+    console.log(req.body);
 
     if (userRole !== 'Admin' && userRole !== 'Manager') {
       return res.status(403).json({ message: 'Only admin and manager users can create products' });
@@ -31,7 +34,7 @@ exports.createProduct = async (req, res) => {
     }
 
     // Generate the SKU based on the provided logic
-    const sku = `${product_name.substring(0, 3)}-${subcategory_id}`;
+    const sku = `${product_name.substring(0, 3)}-${subcategory_id}-${Date.now()}`;
     // Check if the SKU is unique
     const existingProductBySKU = await Product.findOne({ sku });
     if (existingProductBySKU) {
@@ -69,13 +72,19 @@ exports.createProduct = async (req, res) => {
 // Function to get products (search or list)
 exports.listProducts = async (req, res) => {
   try {
-    const page = req.query.page ? parseInt(req.query.page) : 1;
+    const { page = "1", search } = req.query;
+    const pageNum = parseInt(page, 10);
     const perPage = 10;
 
     // Calculate the skip value based on the page and perPage
-    const skip = (page - 1) * perPage;
+    const skip = (pageNum - 1) * perPage;
 
-    const aggregateQuery = [
+    const products = await Product.aggregate([
+      {
+        $match: {
+          product_name: { $regex: new RegExp(search, 'i') },
+        },
+      },
       {
         $skip: skip, // Skip the required number of documents
       },
@@ -95,7 +104,7 @@ exports.listProducts = async (req, res) => {
       },
       {
         $project: {
-          _id: 0, // Exclude _id field
+          _id: 1, // Exclude _id field
           categoryName: '$subcategory.subcategory_name', // Include the subcategory name
           product_name: 1,
           product_image: 1,
@@ -107,12 +116,11 @@ exports.listProducts = async (req, res) => {
           price: 1,
         },
       },
-    ];
-    
+    ]);
 
-    const products = await Product.aggregate(aggregateQuery);
 
-    res.json(products);
+
+    res.status(200).json(products);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal server error', error });
@@ -130,11 +138,6 @@ exports.searchProducts = async (req, res) => {
     const searchQuery = req.query.query;
 
     const aggregateQuery = [
-      {
-        $match: {
-          product_name: { $regex: new RegExp(searchQuery, 'i') }, // Case-insensitive search
-        },
-      },
       {
         $skip: skip,
       },
@@ -168,6 +171,14 @@ exports.searchProducts = async (req, res) => {
       },
     ];
 
+    if (searchQuery) {
+      aggregateQuery.unshift({
+        $match: {
+          product_name: { $regex: new RegExp(searchQuery, 'i') }, // Case-insensitive search
+        },
+      });
+    }
+
     const products = await Product.aggregate(aggregateQuery);
 
     res.json(products);
@@ -176,7 +187,6 @@ exports.searchProducts = async (req, res) => {
     res.status(500).json({ message: 'Internal server error', error });
   }
 };
-
 
 // Function to get a product by ID
 exports.getProductById = async (req, res) => {
@@ -287,6 +297,7 @@ exports.updateProduct = async (req, res) => {
 
     // Update the product data
     const updatedData = {
+      product_image: files.product_image ? files.product_image.path.split('/').pop() : existingProduct.product_image,
       product_name: product_name || existingProduct.product_name,
       subcategory_id: subcategory_id || existingProduct.subcategory_id,
       short_description: short_description || existingProduct.short_description,
@@ -330,7 +341,7 @@ exports.deleteProductById = async (req, res) => {
       const imageFilename = path.basename(imagePath);
 
       // Delete the image file using fs.unlink
-      fs.unlink(`productsimages/${imageFilename}`, (err) => {
+      fs.unlink(`public/uploads/${imageFilename}`, (err) => {
         if (err) {
           console.error(`Error deleting image: ${err}`);
         }

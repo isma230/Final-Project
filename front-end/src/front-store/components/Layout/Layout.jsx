@@ -8,7 +8,7 @@ const Layout = () => {
   const showCart = useSelector((state) => state.cartUI.cartIsVisable);
   return (
     <div>
-      <Header />
+      {/* <Header /> */}
 
       {showCart && <Carts />}
       <div>
